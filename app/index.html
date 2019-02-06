@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+  <title>Remotig</title>
+
+  <!-- <link rel="stylesheet" href="main.css" /> -->
+
+</head>
+
+<body>
+
+  <script src="https://om4aa.ddns.net/socket.io/socket.io.js"></script>
+  <script src="https://webrtc.github.io/adapter/adapter-latest.js"></script>
+  <script src="serial.mjs"></script>
+  <script type="module">
+	  import {start, reset} from './app.mjs'
+	  
+	  // document.querySelector('#activate').onclick = start
+    // document.querySelector('#reset').onclick = start
+    start()
+  </script>
+<!--
+  <script type="module" src="app.mjs"></script>
+-->
+
+  <h1>Remotig services with WebRTC PWA</h1>
+
+	<!-- <button id="activate"><h3>Activate</h3></button> -->
+	<!-- <button id="reset"><h3>Reset</h3></button> -->
+  <div id="audioTracks">
+    <audio id="remoteAudio" autoplay></audio>
+  </div>
+
+</body>
+
+</html>
