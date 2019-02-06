@@ -34,12 +34,14 @@ class Powron {
 	}
 
   async connect() {
+	  console.debug('powron connect request')
     if (!serial || !navigator.usb) {
       throw new Error('powron: WebUSB is not supported!')
     }
 
 	this._port && this.disconnect()
 	
+	console.debug('getting serial.getPorts()')
     const ports = await serial.getPorts()
     console.debug(`powron getPorts(): ${JSON.stringify(ports)}`)
     if (ports.length == 1) {
