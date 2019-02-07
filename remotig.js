@@ -19,7 +19,11 @@ const SerialPort = require('serialport')
 // Starting http & https servers
 app.use(express.static('app'))
 // const httpServer = http.createServer(app)
-httpServer.listen(httpPort, () => console.log(`HTTP Server running on port ${httpPort}`))
+httpServer.listen(httpPort, () => {
+	const url = `http://localhost:${httpPort}`
+	console.log(`HTTP Server running on port ${httpPort}, opening ${url}`)
+	require('opn')(url)
+})
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 let cat;

@@ -82,7 +82,7 @@ function onControlMessage(event) {
 	// 	return
 	// }
 	authTime = secondsNow()
-	// log('cmd: ' + msg)
+	console.debug('cmd: ' + msg)
 
 	const msg = event.data
 	if (msg == 'poweron') {
@@ -160,7 +160,7 @@ function connectSocket() {
 
 	// This client receives a message
 	socket.on('message', function(message) {
-		console.log('message:', message);
+		console.info('message:', message);
 		if (message === 'got user media') {
 			maybeStart();
 		} else if (message.type === 'offer') {
@@ -178,7 +178,9 @@ function connectSocket() {
 			console.info('Session terminated.')
 			stop()
 		} else if (message === 'restart') {
-			reset()
+			console.info('Session restart')
+			// Do RTCPeerConnection & RTCDataChannel reconnect without tcvr powerOff
+			connectionReset = true
 		}
 	});
 }
