@@ -3,14 +3,9 @@ const baudRate = 4800 //115200
 const allowedPins = ['dtr', 'rts']
 const encoding = 'ascii'
 
-// TODO implement chrome open on start: require('opn')
-
 console.log('Starting')
 const express = require('express')
 const app = express()
-// const staticFileServer = require('node-static').Server
-// const fileServer = new staticFileServer()
-// const httpServer = require('http').createServer((req, res) => fileServer.serve(req, res))
 const httpServer = require('http').createServer(app)
 const io = require('socket.io').listen(httpServer)
 const SerialPort = require('serialport')
@@ -28,14 +23,15 @@ httpServer.listen(httpPort, () => {
 
 let cat;
 let cwPtt;
-// const io = socketIO.listen(httpServer)
 io.sockets.on('connection', function(socket) {
 	socket.on('opencat', port => {
+		console.log('opencat:', port)
 		cat = new CatUart(...port)
 	})
 	socket.on('cat', data => cat && cat.serialData(data))
 
 	socket.on('opencwptt', port => {
+		console.log('opencwptt:', port)
 		cwPtt = new CwPttUart(...port)
 	})
 	socket.on('msg', message => { // ASCII

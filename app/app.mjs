@@ -126,6 +126,7 @@ setInterval(tick, heartbeat * 1000)
 
 const remoteAudio = document.querySelector('#remoteAudio');
 let socket;
+let uartSocket;
 let isChannelReady = false;
 let isStarted = false;
 let localStream;
@@ -133,7 +134,8 @@ let pc;
 let remoteStream;
 
 function connectSocket() {
-  socket = io('wss://om4aa.ddns.net', socketIoConfig)
+	socket = io('wss://om4aa.ddns.net', socketIoConfig)
+	uartSocket = io()
   
   socket.on('connect', () => {
     console.info('Create stream', streamName)  
