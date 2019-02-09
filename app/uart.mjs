@@ -1,40 +1,42 @@
 // const baudRate = 4800 //115200
 
 class CwPttUart {
-	constructor(options = {device, keyerPin, pttPin}) {
-		uartSocket.emit('opencwptt', options)
+	constructor(socket, options = {device, keyerPin, pttPin}) {
+		this._socket = socket
+		this._socket.emit('opencwptt', options)
 	}
 
 	keyerState(state) {
 	}
 
 	keyerMessage(msg) {
-		uartSocket.emit('msg', msg)
+		this._socket.emit('msg', msg)
 	}
 
 	keyerCW(cmd) {
-		uartSocket.emit('key', cmd)
+		this._socket.emit('key', cmd)
 	}
 
 	keyerSpeed(wpm) {
-		uartSocket.emit('wpm', wpm)
+		this._socket.emit('wpm', wpm)
 	}
 
 	pttState(state) {
-		uartSocket.emit('ptt', state)
+		this._socket.emit('ptt', state)
 	}
 
 }
 
 class CatUart {
-	constructor(options = {device, baudRate}) {
-		uartSocket.emit('opencat', options)
+	constructor(socket, options = {device, baudRate}) {
+		this._socket = socket
+		this._socket.emit('opencat', options)
 	}
 
 	serial(baudRate) {}
 
 	serialData(data, callback) {
-		uartSocket.emit('cat', data)
+		this._socket.emit('cat', data)
 		callback && callback()
 	}
 }

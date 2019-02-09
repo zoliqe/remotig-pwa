@@ -19,13 +19,14 @@ const powron = new Powron({
 	serialBaudRate: 4800
 })
 
-const catAdapter = powron 
-// const catAdapter =  new CatUart('/dev/ttyUSB2', 4800), // uart must be opened before tcvrAdapter construction 
+const uartSocket = io()
+// const catAdapter = powron 
+const catAdapter =  new CatUart(uartSocket, {device: 'COM6', baudRate: 4800}), // uart must be opened before tcvrAdapter construction 
 const tcvrAdapter = () => ElecraftTcvr.K2(catAdapter) // deffer serial initialization
 
 const keyerOptions = {
 	cwAdapter: powron,
-	pttAdapter: powron, //new CwPttUart({device: '/dev/ttyUSB1', pttPin: 'dtr'}), //powron,
+	pttAdapter: new CwPttUart(uartSocket, {device: 'COM5', pttPin: 'dtr'}), //powron,
 	bufferSize: 2, // letter spaces (delay before start sending dit/dah to keyer)
 	pttTimeout: 5000, // milliseconds
 	pttTail: 500, // millis
