@@ -4,7 +4,27 @@ import {ElecraftTcvr} from './tcvr-elecraft.mjs'
 import {IcomTcvr} from './tcvr-icom.mjs'
 import {YeasuTcvr} from './tcvr-yeasu.mjs'
 
-const port = 8088
+const rigName = 'om4q-k2'
+
+const pcConfig = {
+	//  'iceServers': [{
+	//    'urls': 'stun:stun.l.google.com:19302'
+	//  }]
+	"iceServers": [{
+		"urls": ["turn:om4aa.ddns.net:5349"],
+		"username": "om4aa",
+		"credential": "report559"
+	}]
+}
+const socketIoConfig = {
+	transports: ['websocket'],
+	reconnectionDelay: 10000,
+	reconnectionDelayMax: 60000,
+}
+const userMediaConstraints = { audio: true, video: false }
+const controlChannelConfig = { ordered: true }
+
+////////////////////////////////////////
 const authTimeout = 30 // sec
 const hwWatchdogTimeout = 120 // sec
 const heartbeat = 10 // sec
@@ -21,18 +41,19 @@ const powron = new Powron({
 
 const uartSocket = io()
 // const catAdapter = powron 
-const catAdapter =  new CatUart(uartSocket, {device: 'COM6', baudRate: 4800}), // uart must be opened before tcvrAdapter construction 
+const catAdapter =  new CatUart(uartSocket, {device: '/dev/ttyUSB0', baudRate: 4800}) // uart must be opened before tcvrAdapter construction 
 const tcvrAdapter = () => ElecraftTcvr.K2(catAdapter) // deffer serial initialization
 
 const keyerOptions = {
 	cwAdapter: powron,
-	pttAdapter: new CwPttUart(uartSocket, {device: 'COM5', pttPin: 'dtr'}), //powron,
+	pttAdapter: new CwPttUart(uartSocket, {device: '/dev/ttyUSB1', pttPin: 'dtr'}), //powron,
 	bufferSize: 2, // letter spaces (delay before start sending dit/dah to keyer)
 	pttTimeout: 5000, // milliseconds
 	pttTail: 500, // millis
 }
 
 export {
-	port, authTimeout, hwWatchdogTimeout, heartbeat, tcvrDevice, powronPins, 
-	powron, catAdapter, tcvrAdapter, keyerOptions
+	authTimeout, hwWatchdogTimeout, heartbeat, tcvrDevice, powronPins, 
+	powron, catAdapter, tcvrAdapter, keyerOptions, rigName, pcConfig,
+	socketIoConfig, userMediaConstraints, controlChannelConfig
 }

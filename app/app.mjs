@@ -1,35 +1,15 @@
 import {secondsNow, log, whoIn, delay} from './utils.mjs'
 import {Transceiver} from './tcvr.mjs'
 import {Keyer} from './keyer.mjs'
-import {tokens} from './auth.mjs'
+// import {tokens} from './auth.mjs'
 import {
 	authTimeout, hwWatchdogTimeout, heartbeat, tcvrDevice, 
-	powronPins, powron, tcvrAdapter, keyerOptions
+	powronPins, powron, tcvrAdapter, keyerOptions, rigName,
+	pcConfig, socketIoConfig, userMediaConstraints, controlChannelConfig
 } from './config.mjs'
 
 /////////////////////////////////////////////
 
-const streamName = 'om4aa-k2'
-
-const pcConfig = {
-//  'iceServers': [{
-//    'urls': 'stun:stun.l.google.com:19302'
-//  }]
-	"iceServers": [{
-		"urls": ["turn:om4aa.ddns.net:5349"],
-		"username":"om4aa",
-		"credential":"report559"
-	}]
-}
-const socketIoConfig = {
-  transports: ['websocket'],
-  reconnectionDelay: 10000,
-  reconnectionDelayMax: 60000,
-}
-const userMediaConstraints = {audio: true, video: false}
-const controlChannelConfig = {ordered: true}
-
-////////////////////////////////////////
 const tokenParam = 'token'
 const devices = Object.keys(powronPins)
 const State = {on: 'active', starting: 'starting', off: null, stoping: 'stoping'}
@@ -82,9 +62,9 @@ function onControlMessage(event) {
 	// 	return
 	// }
 	authTime = secondsNow()
+	const msg = event.data
 	console.debug('cmd: ' + msg)
 
-	const msg = event.data
 	if (msg == 'poweron') {
 		powerOn(tcvrDevice)
 		tcvr = tcvr || new Transceiver(tcvrAdapter())
@@ -136,31 +116,31 @@ function connectSocket() {
 	socket = io('wss://om4aa.ddns.net', socketIoConfig)
   
   socket.on('connect', () => {
-    console.info('Create stream', streamName)  
-    socket.emit('create', streamName)
+    console.info('Create rig', rigName)  
+    socket.emit('create', rigName)
   })
   socket.on('reconnect', () => console.debug('socket.io reconnected'))
   socket.on('disconnect', () => console.debug('socket.io disconnected'))
   socket.on('error', error => console.error('socket.io error:', error))
   socket.on('connect_error', error => console.error('socket.io connect_error:', error))
 
-	socket.on('created', function(stream) {
-		console.info('Created stream ' + stream);
+	socket.on('created', function(rig) {
+		console.info('Created rig ' + rig);
 		getLocalStream()
 	});
 
-	socket.on('join', function (stream) {
-		console.info('Another peer made a request to join stream ' + stream);
+	socket.on('join', function (rig) {
+		console.info('Peer made a request to operate rig ' + rig);
 		isChannelReady = true;
 	});
 
 	socket.on('log', function(array) {
-		console.log.apply(console, array);
+		console.debug.apply(console, array);
 	});
 
 	// This client receives a message
 	socket.on('message', function(message) {
-		console.info('message:', message);
+		console.debug('message:', message);
 		if (message === 'got user media') {
 			maybeStart();
 		} else if (message.type === 'offer') {
@@ -327,16 +307,16 @@ function setLocalAndSendMessage(sessionDescription) {
 
 
 //// Access Management
-function authorize(token) {
-	const who = whoIn(token)
-	if (!token || !who) return false
-	if (!tokens.includes(token) || (whoNow && whoNow !== who)) return false
+// function authorize(token) {
+// 	const who = whoIn(token)
+// 	if (!token || !who) return false
+// 	if (!tokens.includes(token) || (whoNow && whoNow !== who)) return false
 
-	whoNow = who
-	authTime = secondsNow()
-	log(`Authored ${who}`)
-	return true
-}
+// 	whoNow = who
+// 	authTime = secondsNow()
+// 	log(`Authored ${who}`)
+// 	return true
+// }
 
 function tick() {
 	// checkPttTimeout();
