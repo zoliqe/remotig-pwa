@@ -1,7 +1,6 @@
 import {secondsNow, log, whoIn, delay} from './utils.mjs'
 import {Transceiver} from './tcvr.mjs'
 import {Keyer} from './keyer.mjs'
-// import {tokens} from './auth.mjs'
 import {
 	authTimeout, hwWatchdogTimeout, heartbeat, tcvrDevice, 
 	powronPins, powron, tcvrAdapter, keyerOptions, rigName,
@@ -23,23 +22,8 @@ let tcvr = null
 let keyer = null
 let connectionReset = false
 
-// app.param(tokenParam, (req, res, next, value) => {
-// 	const token = req.params[tokenParam] && req.params[tokenParam].toUpperCase()
-// 	// log(`request token: ${token}`)
-// 	req.authorized = authorize(token) || error(res, 'EAUTH', 401)
-// 	next()
-// })
-
-// app.get('/status', (req, res) => res.send({ who: whoNow, devices: deviceState, authTime: authTime }))
-
 function onControlOpen() {
 	console.debug('control connect')
-	// if (!req.authorized) {
-	// 	log('unauthorized control, terminating connection')
-	// 	ws.send('disc')
-	// 	ws.terminate()
-	// 	return
-	// }
 	connectionReset = false
 	controlChannel.send('conack')
 	console.info('control open')
@@ -55,12 +39,6 @@ function onControlError(error) {
 }
 
 function onControlMessage(event) {
-	// if (ws !== wsNow && ws.readyState === WebSocket.OPEN) {
-	// 	log(`Unauthored cmd: ${msg}`)
-	// 	ws.send('disc')
-	// 	ws.close()
-	// 	return
-	// }
 	authTime = secondsNow()
 	const msg = event.data
 	console.debug('cmd: ' + msg)
@@ -104,7 +82,7 @@ console.info(`Activating heartbeat every ${heartbeat} s`)
 setInterval(tick, heartbeat * 1000)
 
 
-const remoteAudio = document.querySelector('#remoteAudio');
+const remoteAudio = document.querySelector('#remoteAudio')
 let socket;
 let isChannelReady = false;
 let isStarted = false;
@@ -116,44 +94,44 @@ function connectSocket() {
 	socket = io('wss://om4aa.ddns.net', socketIoConfig)
   
   socket.on('connect', () => {
-    console.info('Create rig', rigName)  
-    socket.emit('create', rigName)
+    console.info('Open rig', rigName)  
+    socket.emit('open', rigName)
   })
   socket.on('reconnect', () => console.debug('socket.io reconnected'))
   socket.on('disconnect', () => console.debug('socket.io disconnected'))
   socket.on('error', error => console.error('socket.io error:', error))
   socket.on('connect_error', error => console.error('socket.io connect_error:', error))
 
-	socket.on('created', function(rig) {
-		console.info('Created rig ' + rig);
+	socket.on('opened', rig => {
+		console.info('Opened rig', rig)
 		getLocalStream()
-	});
+	})
 
-	socket.on('join', function (rig) {
-		console.info('Peer made a request to operate rig ' + rig);
-		isChannelReady = true;
-	});
+	socket.on('join', rig => {
+		console.info('Peer made a request to operate rig ' + rig)
+		isChannelReady = true
+	})
 
-	socket.on('log', function(array) {
-		console.debug.apply(console, array);
-	});
+	socket.on('log', array => {
+		console.debug.apply(console, array)
+	})
 
 	// This client receives a message
-	socket.on('message', function(message) {
-		console.debug('message:', message);
+	socket.on('message', message => {
+		console.debug('message:', message)
 		if (message === 'got user media') {
-			maybeStart();
+			maybeStart()
 		} else if (message.type === 'offer') {
-			pc.setRemoteDescription(new RTCSessionDescription(message));
-			doAnswer();
+			pc.setRemoteDescription(new RTCSessionDescription(message))
+			doAnswer()
 		} else if (message.type === 'answer' && isStarted) {
-			pc.setRemoteDescription(new RTCSessionDescription(message));
+			pc.setRemoteDescription(new RTCSessionDescription(message))
 		} else if (message.type === 'candidate' && isStarted) {
 			const candidate = new RTCIceCandidate({
 				sdpMLineIndex: message.label,
 				candidate: message.candidate
-			});
-			pc.addIceCandidate(candidate);
+			})
+			pc.addIceCandidate(candidate)
 		} else if (message === 'bye' && isStarted) {
 			console.info('Session terminated.')
 			stop()
@@ -167,8 +145,8 @@ function connectSocket() {
 
 function sendMessage(message) {
 	if (socket && socket.connected) {
-		console.debug('sendMessage:', message);
-		socket.emit('message', message);
+		console.debug('sendMessage:', message)
+		socket.emit('message', message)
 	}
 }
 
@@ -195,6 +173,7 @@ export function start() {
 		console.info('Hanging up.')
 		sendMessage('bye')
 		stop()
+		socket.emit('close', rigName)
 	}
 }
 
@@ -336,17 +315,17 @@ function checkAuthTimeout() {
 	startedServices.forEach(powerOff)
 }
 
-function disconnectOtherThan(currentWs) {
-	appWs.getWss().clients
-		//.filter(client => client !== currentWs && client.readyState === WebSocket.OPEN)
-		.forEach(client => {
-			if (client !== currentWs && client.readyState === WebSocket.OPEN) {
-				log('Sending client disc')
-				client.send('disc')
-//				client.close()
-			}
-		}) // disconnect others
-}
+// function disconnectOtherThan(currentWs) {
+// 	appWs.getWss().clients
+// 		//.filter(client => client !== currentWs && client.readyState === WebSocket.OPEN)
+// 		.forEach(client => {
+// 			if (client !== currentWs && client.readyState === WebSocket.OPEN) {
+// 				log('Sending client disc')
+// 				client.send('disc')
+// //				client.close()
+// 			}
+// 		}) // disconnect others
+// }
 
 /*function executeAction(req, res, state) {
 	const token = req.params[tokenParam] && req.params[tokenParam].toUpperCase()

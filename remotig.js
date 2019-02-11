@@ -25,13 +25,21 @@ let cat;
 let cwPtt;
 io.sockets.on('connection', function(socket) {
 	socket.on('opencat', port => {
-		cat && cat.close()
+		try {
+			cat && cat.close()
+		} catch (e) {
+			console.log('Error closing catUart:', e)
+		}
 		cat = new CatUart(port)
 	})
 	socket.on('cat', data => cat && cat.serialData(data))
 
 	socket.on('opencwptt', port => {
-		cwPtt && cwPtt.close()
+		try {
+			cwPtt && cwPtt.close()
+		} catch (e) {
+			console.log('Error closing cwpttUart:', e)
+		}
 		cwPtt = new CwPttUart(port)
 	})
 	socket.on('msg', message => { // ASCII
@@ -51,9 +59,10 @@ class CwPttUart {
 		this._pttPin = options.pttPin && allowedPins.includes(options.pttPin) ? options.pttPin : null
 
 		// console.log('Opening CW/PTT UART', options)
-		this._uart = new SerialPort(options.device, { baudRate: cwpttBaudRate },
+		let uart = new SerialPort(options.device, { baudRate: cwpttBaudRate },
 			(err) => err && console.log('CW/PTT UART error:', err))
-		this._uart.on('open', () => {
+		uart.on('open', () => {
+			this._uart = uart
 			console.log('CW/PTT UART opened:', options)
 			// this._uart.on('data', (data) => console.log(`UART => ${String(data).trim()}`))
 			this.pttState(false)
@@ -72,7 +81,7 @@ class CwPttUart {
 	}
 
 	pttState(state) {
-		if (this._pttPin) {
+		if (this._pttPin && this._uart) {
 			const opts = {}
 			opts[this._pttPin] = state
 			console.log('PTT:', opts)
@@ -88,9 +97,12 @@ class CwPttUart {
 class CatUart {
 	constructor(options = { device, baudRate }) {
 		// console.log('Opening TCVR CAT', options)
-		this._uart = new SerialPort(options.device, { baudRate: options.baudRate },
+		let uart = new SerialPort(options.device, { baudRate: options.baudRate },
 			(err) => err && console.log('CAT UART error:', err))
-		this._uart.on('open', () => console.log('CAT UART opened:', options))
+		uart.on('open', () => {
+			this._uart = uart
+			console.log('CAT UART opened:', options)
+		})
 		// tcvr.on('data', (data) => log(`CAT => ${data}`))
 	}
 
