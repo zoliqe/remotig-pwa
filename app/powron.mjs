@@ -52,10 +52,10 @@ class Powron {
       this._port = await serial.requestPort(); // TODO stop connection process, use button to connect
     }
 
-//    return new Promise((resolve, reject) => this._connectPort(resolve, reject))
-    console.debug(`powron device: ${this._port.device_.productName} (${this._port.device_.manufacturerName})`)
-      await this._port.connect()
-      console.info('powron connected :-)')
+    return new Promise((resolve, reject) => this._connectPort(resolve, reject))
+//    console.debug(`powron device: ${this._port.device_.productName} (${this._port.device_.manufacturerName})`)
+//      await this._port.connect()
+//      console.info('powron connected :-)')
 
   }
 
@@ -78,14 +78,14 @@ class Powron {
       reject(error)
       return
     }
-    // this._port.onReceive = data => this._evaluate(data)
-    // this._port.onReceiveError = error => this.onReceiveError(error)
+    this._port.onReceive = data => console.debug('powron rcvd:', this._decoder.decode(data))
+    this._port.onReceiveError = error => this.onReceiveError(error)
     resolve(this)
   }
 
-  // onReceiveError(error) {
-    // console.error(`powron: ${error}`)
-  // }
+  onReceiveError(error) {
+    console.error('powron error:', error)
+  }
 
   disconnect() {
     this._port && this._port.disconnect()
@@ -137,8 +137,8 @@ class Powron {
 	}
 
 	send(data, callback) {
-		// console.log(`POWRON <= ${data.trim()}`)
-    this._port && this._port.send(this._encoder.encode(data + '\n')) //&& console.debug(`powron sent: ${data}`)
+		//console.debug(`POWRON <= ${data.trim()}`)
+    this._port && this._port.send(this._encoder.encode(data + '\n')) && console.debug(`powron sent: ${data}`)
 		// data.length > 1 && (data += '\n') // add NL delimiter for cmd with param
 		// this._uart.write(data, encoding, (err) => {
 		// 	if (err) console.log(`POWRON ${err.message}`)
