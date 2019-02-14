@@ -147,4 +147,67 @@ class Powron {
 	}
 }
 
+class PowronSocket {
+	constructor(socket, options = {device, keyerPin, pttPin, serialBaudRate}) {
+		this._socket = socket
+		this._socket.emit('openpowron', {device: options.device})
+		this._timeout = 600
+		this._keyerPin = options.keyerPin
+		this._pttPin = options.pttPin
+		this._serialBaudRate = options.serialBaudRate
+		setTimeout(() => {
+			this.send(startSeq)
+			this._serialBaudRate && setTimeout(() => this.serial(this._serialBaudRate), 1000)
+		}, 5000)
+}
+
+	get timeout() {
+		return this._timeout
+	}
+
+	set timeout(value) {
+		this._timeout = Number(value)
+		this.send(`T${this._timeout}`)
+	}
+
+	get keyerPin() {
+		return this._keyerPin
+	}
+
+	pinState(pin, state) {
+		this.send(cmdByState(state) + pin)
+	}
+
+	keyerState(state) {
+		if (this._keyerPin && Object.values(PowronPins).includes(this._keyerPin)) {
+			this.pinState(this._keyerPin, false)
+			this.send(`K${state ? this._keyerPin : 0}`)
+		}
+	}
+
+	keyerCW(cmd) {
+		this.send(cmd)
+	}
+
+	keyerSpeed(wpm) {
+		this.send('S' + wpm)
+	}
+
+	pttState(state) {
+		this._pttPin && this.pinState(this._pttPin, state)
+	}
+
+	serial(baudrate) {
+		this.send(`P${baudrate / 100}`)
+	}
+
+	serialData(data) {
+		this.send('>' + data)
+	}
+
+	send(data) {
+		this._socket.emit('powron', data)
+	}
+}
+
 export {Powron, PowronPins}

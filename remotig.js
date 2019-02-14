@@ -1,5 +1,6 @@
 const httpPort = 8088
 const cwpttBaudRate = 4800 //115200
+const powronBaudRate = 4800 //115200
 const allowedPins = ['dtr', 'rts']
 const encoding = 'ascii'
 
@@ -17,12 +18,14 @@ app.use(express.static('app'))
 httpServer.listen(httpPort, () => {
 	const url = `http://localhost:${httpPort}`
 	console.log(`HTTP Server running on port ${httpPort}, opening ${url}`)
-	require('opn')(url)
+	// Chrome is google chrome on macOS, google-chrome on Linux and chrome on Windows
+	require('opn')(url, {app: ['chrome']})
 })
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 let cat;
 let cwPtt;
+let powron;
 io.sockets.on('connection', function(socket) {
 	socket.on('opencat', port => {
 		try {
@@ -33,6 +36,16 @@ io.sockets.on('connection', function(socket) {
 		cat = new CatUart(port)
 	})
 	socket.on('cat', data => cat && cat.serialData(data))
+
+	socket.on('openpowron', port => {
+		try {
+			powron && powron.close()
+		} catch (e) {
+			console.log('Error closing powron:', e)
+		}
+		powron = new PowronUart(port)
+	})
+	socket.on('powron', data => powron && powron.send(data))
 
 	socket.on('opencwptt', port => {
 		try {
@@ -106,8 +119,6 @@ class CatUart {
 		// tcvr.on('data', (data) => log(`CAT => ${data}`))
 	}
 
-	serial(baudRate) { }
-
 	serialData(data, callback) {
 		console.log('CAT serialData:', data)
 		this._uart && this._uart.write(data, encoding, (err) => {
@@ -121,3 +132,28 @@ class CatUart {
 	}
 }
 
+class PowronUart {
+	constructor(options = {device}) {
+		// log(`Opening POWRON ${uartDev}`)
+		this._uart = new SerialPort(options.device, { baudRate: powronBaudRate },
+			(err) => err && console.log('POWRON error:', err))
+		this._uart.on('open', () => {
+			console.log('POWRON opened:', options)
+			// this._uart.on('data', (data) => console.log(`POWRON => ${String(data).trim()}`))
+			// setTimeout(() => {
+			// 	this.send(startSeq)
+			// 	options.serialBaudRate && setTimeout(() => this.serial(options.serialBaudRate), 1000)
+			// }, 3000)
+		})
+	}
+
+	close() {
+		this._uart && this._uart.close()
+	}
+
+	send(data) {
+		// console.log(`POWRON <= ${data.trim()}`)
+		data.length > 1 && (data += '\n') // add NL delimiter for cmd with param
+		this._uart.write(data, encoding, (err) => err && console.log('POWRON error:', err))
+	}
+}
