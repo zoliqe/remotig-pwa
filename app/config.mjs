@@ -21,7 +21,16 @@ const socketIoConfig = {
 	reconnectionDelay: 10000,
 	reconnectionDelayMax: 60000,
 }
-const userMediaConstraints = { audio: true, video: false }
+const userMediaConstraints = { 
+	video: false, 
+	audio: true, 
+	channelCount: 1, 
+	autoGainControl: false, 
+	echoCancellation: false,
+	noiseSuppresion: false,
+	sampleRate: 8000,
+	volume: 1.0,
+}
 const controlChannelConfig = { ordered: true }
 
 ////////////////////////////////////////
