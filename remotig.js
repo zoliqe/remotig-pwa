@@ -139,11 +139,6 @@ class PowronUart {
 			(err) => err && console.log('POWRON error:', err))
 		this._uart.on('open', () => {
 			console.log('POWRON opened:', options)
-			// this._uart.on('data', (data) => console.log(`POWRON => ${String(data).trim()}`))
-			// setTimeout(() => {
-			// 	this.send(startSeq)
-			// 	options.serialBaudRate && setTimeout(() => this.serial(options.serialBaudRate), 1000)
-			// }, 3000)
 		})
 	}
 
@@ -152,7 +147,7 @@ class PowronUart {
 	}
 
 	send(data) {
-		// console.log(`POWRON <= ${data.trim()}`)
+		console.log('POWRON <=', data)
 		data.length > 1 && (data += '\n') // add NL delimiter for cmd with param
 		this._uart.write(data, encoding, (err) => err && console.log('POWRON error:', err))
 	}

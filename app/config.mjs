@@ -1,4 +1,4 @@
-import {Powron, PowronPins} from './powron.mjs'
+import {Powron, PowronSocket, PowronPins} from './powron.mjs'
 import {CwPttUart, CatUart} from './uart.mjs'
 import {ElecraftTcvr} from './tcvr-elecraft.mjs'
 import {IcomTcvr} from './tcvr-icom.mjs'
@@ -32,6 +32,7 @@ const tcvrDevice = 'TCVR'
 
 const powronPins = {'TCVR': [PowronPins.pin2, PowronPins.pin4]}
 
+const uartSocket = io()
 const powron = new Powron({
 	// device: '/dev/ttyUSB0', //'/dev/ttyS0','/dev/ttyAMA0','COM14'
 	keyerPin: PowronPins.pin5,
@@ -39,7 +40,6 @@ const powron = new Powron({
 	serialBaudRate: 4800
 })
 
-const uartSocket = io()
 // const catAdapter = powron 
 const catAdapter =  new CatUart(uartSocket, {device: '/dev/ttyUSB0', baudRate: 4800}) // uart must be opened before tcvrAdapter construction 
 const tcvrAdapter = () => ElecraftTcvr.K2(catAdapter) // deffer serial initialization

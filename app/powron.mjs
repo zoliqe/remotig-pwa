@@ -210,4 +210,4 @@ class PowronSocket {
 	}
 }
 
-export {Powron, PowronPins}
+export {Powron, PowronSocket, PowronPins}
