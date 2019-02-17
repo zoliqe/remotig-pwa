@@ -71,12 +71,12 @@ class CwPttUart {
 		this._keyerPin = options.keyerPin && allowedPins.includes(options.keyerPin) ? options.keyerPin : null
 		this._pttPin = options.pttPin && allowedPins.includes(options.pttPin) ? options.pttPin : null
 
-		// console.log('Opening CW/PTT UART', options)
+		// console.log('Opening CW/PTT', options)
 		let uart = new SerialPort(options.device, { baudRate: cwpttBaudRate },
-			(err) => err && console.log('CW/PTT UART error:', err))
+			(err) => err && console.log('CW/PTT error:', err))
 		uart.on('open', () => {
 			this._uart = uart
-			console.log('CW/PTT UART opened:', options)
+			console.log('CW/PTT opened:', options)
 			// this._uart.on('data', (data) => console.log(`UART => ${String(data).trim()}`))
 			this.pttState(false)
 		})
@@ -97,13 +97,14 @@ class CwPttUart {
 		if (this._pttPin && this._uart) {
 			const opts = {}
 			opts[this._pttPin] = state
-			console.log('PTT:', opts)
+			// console.log('PTT:', opts)
 			this._uart.set(opts)
 		}
 	}
 
 	close() {
 		this._uart && this._uart.close()
+		console.log('CW/PTT closed')
 	}
 }
 
@@ -111,24 +112,25 @@ class CatUart {
 	constructor(options = { device, baudRate }) {
 		// console.log('Opening TCVR CAT', options)
 		let uart = new SerialPort(options.device, { baudRate: options.baudRate },
-			(err) => err && console.log('CAT UART error:', err))
+			(err) => err && console.log('CAT error:', err))
 		uart.on('open', () => {
 			this._uart = uart
-			console.log('CAT UART opened:', options)
+			console.log('CAT opened:', options)
 		})
 		// tcvr.on('data', (data) => log(`CAT => ${data}`))
 	}
 
 	serialData(data, callback) {
-		console.log('CAT serialData:', data)
+		// console.log('CAT serialData:', data)
 		this._uart && this._uart.write(data, encoding, (err) => {
-			if (err) console.log('CAT UART error:', err)
+			if (err) console.log('CAT error:', err)
 			else if (callback) callback()
 		})
 	}
 
 	close() {
 		this._uart && this._uart.close()
+		console.log('CAT closed')
 	}
 }
 
@@ -144,10 +146,11 @@ class PowronUart {
 
 	close() {
 		this._uart && this._uart.close()
+		console.log('POWRON closed')
 	}
 
 	send(data) {
-		console.log('POWRON <=', data)
+		// console.log('POWRON <=', data)
 		data.length > 1 && (data += '\n') // add NL delimiter for cmd with param
 		this._uart.write(data, encoding, (err) => err && console.log('POWRON error:', err))
 	}

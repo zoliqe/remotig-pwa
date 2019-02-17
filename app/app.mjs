@@ -95,7 +95,7 @@ function connectSocket() {
   
   socket.on('connect', () => {
     console.info('Open rig', rigName)  
-    socket.emit('open', rigName)
+    sendSignal('open', rigName)
   })
   socket.on('reconnect', () => console.debug('socket.io reconnected'))
   socket.on('disconnect', () => console.debug('socket.io disconnected'))
@@ -132,7 +132,7 @@ function connectSocket() {
 				candidate: message.candidate
 			})
 			pc.addIceCandidate(candidate)
-		} else if (message === 'bye' && isStarted) {
+		} else if (message === 'bye') {
 			console.info('Session terminated.')
 			stop()
 		} else if (message === 'restart') {
@@ -147,6 +147,13 @@ function sendMessage(message) {
 	if (socket && socket.connected) {
 		console.debug('sendMessage:', message)
 		socket.emit('message', message)
+	}
+}
+
+function sendSignal(signal, data) {
+	if (socket && socket.connected) {
+		console.debug('sendSignal:', signal, data)
+		socket.emit(signal, data)
 	}
 }
 
@@ -173,7 +180,7 @@ export function start() {
 		console.info('Hanging up.')
 		sendMessage('bye')
 		stop()
-		socket.emit('close', rigName)
+		sendSignal('close', rigName)
 	}
 }
 
@@ -378,6 +385,9 @@ async function powerOff(device) {
 function logout() {
 	whoNow = authTime = null
 	log('logout')
+	sendMessage('bye')
+	stop()
+	sendSignal('logout', rigName)
 }
 
 async function managePower(device, state) {
