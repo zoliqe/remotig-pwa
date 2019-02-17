@@ -107,8 +107,9 @@ function connectSocket() {
 		getLocalStream()
 	})
 
-	socket.on('join', rig => {
-		console.info('Peer made a request to operate rig ' + rig)
+	socket.on('join', op => {
+		whoNow = op
+		console.info(`Operator ${op} made a request to operate rig`)
 		isChannelReady = true
 	})
 
@@ -232,7 +233,7 @@ function createPeerConnection() {
   try {
     pc = new RTCPeerConnection(pcConfig)
     pc.onicecandidate = handleIceCandidate
-    pc.onaddstream = handleRemoteStreamAdded
+    // pc.onaddstream = handleRemoteStreamAdded
 		pc.onremovestream = handleRemoteStreamRemoved
 		
 		controlChannel = pc.createDataChannel('control', controlChannelConfig)
@@ -310,6 +311,7 @@ function tick() {
 }
 
 function checkAuthTimeout() {
+	console.debug(`checkAuthTimeout op=${whoNow} authTime=${authTime}`)
 	if (!whoNow) return
 	if (!authTime || (authTime + authTimeout) > secondsNow()) return
 
