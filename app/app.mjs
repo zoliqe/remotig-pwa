@@ -120,7 +120,7 @@ function connectSocket() {
 	// This client receives a message
 	socket.on('message', message => {
 		console.debug('message:', message)
-		if (message === 'got user media') {
+		if (message === 'ready') {
 			maybeStart()
 		} else if (message.type === 'offer') {
 			pc.setRemoteDescription(new RTCSessionDescription(message))
@@ -207,9 +207,10 @@ function getLocalStream() {
 }
 
 function gotStream(stream) {
-  console.debug('Adding local stream.');
-  localStream = stream;
-  sendMessage('got user media');
+	console.debug('Adding local stream tracks with constraints:')
+	stream.getTracks().forEach(track => console.log(track.getSettings()))
+  localStream = stream
+  sendMessage('ready')
 }
 
 function maybeStart() {
@@ -219,11 +220,12 @@ function maybeStart() {
       console.info('Closing previous active RTCPeerConnection')
       pc && pc.close()
     }
-    console.debug('>>>>>> creating peer connection');
-    createPeerConnection();
-    pc.addStream(localStream);
-    isStarted = true;
-    doCall();
+    console.debug('>>>>>> creating peer connection')
+    createPeerConnection()
+		// pc.addStream(localStream);
+		localStream.getTracks().forEach(track => pc.addTrack(track, stream))
+    isStarted = true
+    doCall()
   }
 }
 
@@ -234,7 +236,7 @@ function createPeerConnection() {
     pc = new RTCPeerConnection(pcConfig)
     pc.onicecandidate = handleIceCandidate
     // pc.onaddstream = handleRemoteStreamAdded
-		pc.onremovestream = handleRemoteStreamRemoved
+		// pc.onremovestream = handleRemoteStreamRemoved
 		
 		controlChannel = pc.createDataChannel('control', controlChannelConfig)
 		controlChannel.onopen = onControlOpen
