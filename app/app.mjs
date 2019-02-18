@@ -109,6 +109,7 @@ function connectSocket() {
 
 	socket.on('join', op => {
 		whoNow = op
+		authTime = secondsNow()
 		console.info(`Operator ${op} made a request to operate rig`)
 		isChannelReady = true
 	})
@@ -222,8 +223,8 @@ function maybeStart() {
     }
     console.debug('>>>>>> creating peer connection')
     createPeerConnection()
-		// pc.addStream(localStream);
-		localStream.getTracks().forEach(track => pc.addTrack(track, stream))
+		pc.addStream(localStream);
+		// localStream.getTracks().forEach(track => pc.addTrack(track, localStream))
     isStarted = true
     doCall()
   }
