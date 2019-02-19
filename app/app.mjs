@@ -394,6 +394,9 @@ async function powerOn(device) {
 }
 
 async function powerOff(device) {
+	const state = deviceState[device]
+	if (state === State.off || state === State.stoping) return;
+	
 	deviceState[device] = State.stoping
 	log(`powerOff: ${device}`)
 	managePower(device, false)
