@@ -413,8 +413,9 @@ async function powerOff(device) {
 	await delay(2000)
 
 	deviceState[device] = State.off
-	const activeDevs = devices.filter(dev => deviceState[dev] !== State.off)
-	activeDevs.length == 0 && logout()
+	// const activeDevs = devices.filter(dev => deviceState[dev] !== State.off)
+	// activeDevs.length == 0 && logout()
+	logout()
 }
 
 function logout() {
