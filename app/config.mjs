@@ -11,9 +11,9 @@ const pcConfig = {
 	//    'urls': 'stun:stun.l.google.com:19302'
 	//  }]
 	"iceServers": [{
-		"urls": ["turn:om4aa.ddns.net:5349"],
-		"username": "om4aa",
-		"credential": "report559"
+		"urls": ['turns:om4aa.ddns.net:25349'],
+		"username": 'remotig',
+		"credential": 'om4aa'
 	}]
 }
 const socketIoConfig = {

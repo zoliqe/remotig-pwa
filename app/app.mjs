@@ -174,8 +174,8 @@ export function stop() {
 	if (controlChannel) {
 		controlChannel.close()
 		controlChannel.onopen = null
-		controlChannel.onclose = null
-		controlChannel.onerror = null
+		// controlChannel.onclose = null
+		// controlChannel.onerror = null
 		controlChannel.onmessage = null
 		controlChannel = null
 	}
@@ -187,6 +187,7 @@ export function stop() {
 		pc.onremovetrack = null
 		pc = null
 	}
+	powerOff(tcvrDevice) // force powerOff
 }
 
 ////////////////////////////////////////////////////
@@ -256,8 +257,6 @@ function createPeerConnection() {
 		pc.onicecandidate = handleIceCandidate
 		pc.ontrack = handleRemoteTrackAdded
 		pc.onremovetrack = handleRemoteTrackRemoved
-    // pc.onaddstream = handleRemoteStreamAdded
-		// pc.onremovestream = handleRemoteStreamRemoved
 		
 		controlChannel = pc.createDataChannel('control', controlChannelConfig)
 		controlChannel.onopen = onControlOpen
@@ -277,19 +276,9 @@ function handleRemoteTrackAdded(event) {
   remoteAudio.srcObject = remoteStream
 }
 
-// function handleRemoteStreamAdded(event) {
-//   console.debug('Remote stream added.', event);
-//   remoteStream = event.stream;
-//   remoteAudio.srcObject = remoteStream;
-// }
-
 function handleRemoteTrackRemoved(event) {
   console.debug('Remote track removed:', event);
 }
-
-// function handleRemoteStreamRemoved(event) {
-//   console.debug('Remote stream removed. Event: ', event);
-// }
 
 function handleIceCandidate(event) {
   console.debug('icecandidate event: ', event);
@@ -344,8 +333,8 @@ function tick() {
 }
 
 function checkAuthTimeout() {
-	console.debug(`checkAuthTimeout op=${whoNow} authTime=${authTime}`)
 	if (!whoNow) return
+	console.debug(`checkAuthTimeout op=${whoNow} authTime=${authTime}`)
 	if (!authTime || (authTime + authTimeout) > secondsNow()) return
 
 	const startedServices = devices.filter(service => deviceState[service] === State.on)
