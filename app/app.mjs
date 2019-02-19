@@ -172,19 +172,19 @@ export function stop() {
 	isChannelReady = false
 
 	if (controlChannel) {
+		controlChannel.close()
 		controlChannel.onopen = null
 		controlChannel.onclose = null
 		controlChannel.onerror = null
 		controlChannel.onmessage = null
-		controlChannel.close()
 		controlChannel = null
 	}
 
 	if (pc) {
+		pc.close()
 		pc.onicecandidate = null
 		pc.ontrack = null
 		pc.onremovetrack = null
-		pc.close()
 		pc = null
 	}
 }
@@ -413,9 +413,8 @@ async function powerOff(device) {
 	await delay(2000)
 
 	deviceState[device] = State.off
-	// const activeDevs = devices.filter(dev => deviceState[dev] !== State.off)
-	// activeDevs.length == 0 && logout()
-	logout()
+	const activeDevs = devices.filter(dev => deviceState[dev] !== State.off)
+	activeDevs.length == 0 && logout()
 }
 
 function logout() {
