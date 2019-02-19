@@ -163,12 +163,30 @@ function sendSignal(signal, data) {
 
 export function stop() {
 	console.debug('stoping stream')
-  isStarted = false
+	remoteStream && remoteStream.getTracks().forEach(track => track.stop())
+	remoteStream = null
+	remoteAudio.removeAttribute("src")
+	remoteAudio.removeAttribute("srcObject")
+	
+	isStarted = false
 	isChannelReady = false
-	controlChannel && controlChannel.close()
-	controlChannel = null
-  pc && pc.close()
-  pc = null
+
+	if (controlChannel) {
+		controlChannel.onopen = null
+		controlChannel.onclose = null
+		controlChannel.onerror = null
+		controlChannel.onmessage = null
+		controlChannel.close()
+		controlChannel = null
+	}
+
+	if (pc) {
+		pc.onicecandidate = null
+		pc.ontrack = null
+		pc.onremovetrack = null
+		pc.close()
+		pc = null
+	}
 }
 
 ////////////////////////////////////////////////////
@@ -223,8 +241,8 @@ function maybeStart() {
     }
     console.debug('>>>>>> creating peer connection')
     createPeerConnection()
-		pc.addStream(localStream);
-		// localStream.getTracks().forEach(track => pc.addTrack(track, localStream))
+		// pc.addStream(localStream);
+		localStream.getTracks().forEach(track => pc.addTrack(track, localStream))
     isStarted = true
     doCall()
   }
@@ -235,7 +253,9 @@ function maybeStart() {
 function createPeerConnection() {
   try {
     pc = new RTCPeerConnection(pcConfig)
-    pc.onicecandidate = handleIceCandidate
+		pc.onicecandidate = handleIceCandidate
+		pc.ontrack = handleRemoteTrackAdded
+		pc.onremovetrack = handleRemoteTrackRemoved
     // pc.onaddstream = handleRemoteStreamAdded
 		// pc.onremovestream = handleRemoteStreamRemoved
 		
@@ -251,15 +271,25 @@ function createPeerConnection() {
   }
 }
 
-function handleRemoteStreamAdded(event) {
-  console.debug('Remote stream added.', event);
-  remoteStream = event.stream;
-  remoteAudio.srcObject = remoteStream;
+function handleRemoteTrackAdded(event) {
+  console.debug('Remote track added:', event)
+  remoteStream = event.streams[0]
+  remoteAudio.srcObject = remoteStream
 }
 
-function handleRemoteStreamRemoved(event) {
-  console.debug('Remote stream removed. Event: ', event);
+// function handleRemoteStreamAdded(event) {
+//   console.debug('Remote stream added.', event);
+//   remoteStream = event.stream;
+//   remoteAudio.srcObject = remoteStream;
+// }
+
+function handleRemoteTrackRemoved(event) {
+  console.debug('Remote track removed:', event);
 }
+
+// function handleRemoteStreamRemoved(event) {
+//   console.debug('Remote stream removed. Event: ', event);
+// }
 
 function handleIceCandidate(event) {
   console.debug('icecandidate event: ', event);
