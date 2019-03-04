@@ -52,7 +52,8 @@ function onControlMessage(event) {
 		powerOff(tcvrDevice)
 	} else if (['ptton', 'pttoff'].includes(msg)) {
 		const state = msg.endsWith('on')
-		keyer && keyer.ptt(state)
+		// keyer && keyer.ptt(state) // TODO ptt on/off only in SSB modes!
+
 		// if (!state || keyerPin) { // ptt on only when enabled
 		// 	powron.pinState(keyerPin, state)
 		// 	pttTime = state ? secondsNow() : null
