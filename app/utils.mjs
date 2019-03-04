@@ -18,7 +18,8 @@ function error(res, err, status = 400) {
 }
 
 function delay(ms) {
-	return new Promise(resolve => setTimeout(resolve, ms));
+	if (ms == null) return null
+	return new Promise(resolve => setTimeout(resolve, ms))
 }
 
 export {secondsNow, log, whoIn, delay, error}

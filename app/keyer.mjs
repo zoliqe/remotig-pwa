@@ -2,8 +2,8 @@ import {delay} from './utils.mjs'
 
 class Keyer {
 
-	constructor({cwAdapter, pttAdapter, bufferSize = 2, pttLead = 0, pttTail = 500, pttTimeout = 5000}) {
-		this._lastKeyed = Date.now()
+	constructor({cwAdapter, pttAdapter, bufferSize = 2, pttLead = 120, pttTail = 500, pttTimeout = 5000}) {
+		// this._lastKeyed = Date.now()
 		this._wpm = 0
 		this._bufferSize = bufferSize
 		this._pttLead = pttLead
@@ -20,29 +20,34 @@ class Keyer {
 	send(msg) {
 		if (this.disabled) return
 
-		if (msg == '.' || msg == '-') this.ptt(true, this._pttTail)
-		if (this._lastKeyed + this._pttLead < Date.now()) {
-			// on longer pause btw elements send buffering spaces
-			if (this._bufferSize) for (let i = 0; i < this._bufferSize; i++) this._cw('_')
-			else delay(this._pttLead) 
+		if (msg == '.' || msg == '-') {
+			const pttWasOff = this._pttTimer == null
+			this.ptt(true, this._pttTail)
+			if (pttWasOff/*this._lastKeyed + this._pttLead < Date.now()*/) {
+				// on longer pause btwn elements send buffering spaces
+				if (this._bufferSize != null) for (let i = 0; i < this._bufferSize; i++) this._cw('_')
+				// cannot use async delayed calls w/o buffered msgs (FIFO) and locking during pttLead
+				//			else await delay(this._pttLead) 
+			}
 		}
 
 		this._cw(msg)
-		this._lastKeyed = Date.now()
+		// this._lastKeyed = Date.now()
 	}
 
 	ptt(state, timeout = this._pttTimeout) {
-		this._ptt(state)
 		if (state) {
-			this._pttTimer && clearTimeout(this._pttTimer)
+			if (this._pttTimer != null) clearTimeout(this._pttTimer)
+			else this._ptt(true)
 			this._pttTimer = setTimeout(() => {
 				this._pttTimer = null
 				this._ptt(false)
 			}, timeout)
-		} else {
-			clearTimeout(this._pttTimer)
-			this._pttTimer = null
+			return;
 		}
+		this._ptt(false)
+		this._pttTimer != null && clearTimeout(this._pttTimer)
+		this._pttTimer = null
 	}
 
 	get wpm() {
@@ -53,7 +58,7 @@ class Keyer {
 		this._wpm = Number(value)
 		if (this.disabled) return
 
-		if (this._bufferSize) this._pttLead = (3600 / this._wpm) * this._bufferSize
+		// if (this._bufferSize) this._pttLead = (3600 / this._wpm) * this._bufferSize
 		this._speed(this._wpm)
 	}
 

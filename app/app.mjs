@@ -396,13 +396,13 @@ async function powerOn(device) {
 async function powerOff(device) {
 	const state = deviceState[device]
 	if (state === State.off || state === State.stoping) return;
-	
+
 	deviceState[device] = State.stoping
 	log(`powerOff: ${device}`)
 	managePower(device, false)
-	await delay(1000)
+	await delay(500)
 	managePower(device, false)
-	await delay(2000)
+	await delay(1000)
 
 	deviceState[device] = State.off
 	const activeDevs = devices.filter(dev => deviceState[dev] !== State.off)
