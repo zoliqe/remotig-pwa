@@ -115,6 +115,8 @@ function connectSocket() {
 		isChannelReady = true
 	})
 
+	socket.on('ping', data => sendSignal('pong', data))
+
 	socket.on('log', array => {
 		console.debug.apply(console, array)
 	})
