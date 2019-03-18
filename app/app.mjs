@@ -66,11 +66,15 @@ function onControlMessage(event) {
 		tcvr && (tcvr.mode = msg.substring(5))
 	} else if (msg.startsWith('filter=')) {
 		tcvr && (tcvr.filter = msg.substring(7))
-	} else if (['preampon', 'preampoff'].includes(msg)) {
+	} else if (msg.startsWith('gain=')) {
+		tcvr && (tcvr.gain = msg.substring(5))
+	} else if (['preampon', 'preampoff'].includes(msg)) { // deprecated
 		tcvr && (tcvr.gain = msg.endsWith('on') ? tcvr.preampLevels[0] : 0)
-	} else if (['attnon', 'attnoff'].includes(msg)) {
+	} else if (['attnon', 'attnoff'].includes(msg)) { // deprecated
 		tcvr && (tcvr.gain = msg.endsWith('on') ? (0 - tcvr.attnLevels[0]) : 0)
-	} else if (['agcon', 'agcoff'].includes(msg)) {
+	} else if (msg.startsWith('agc=')) {
+		tcvr && (tcvr.agc = msg.substring(4))
+	} else if (['agcon', 'agcoff'].includes(msg)) { // deprecated
 		tcvr && (tcvr.agc = tcvr.agcTypes[msg.endsWith('on') ? 0 : 1])
 	} else if (msg === 'gains?') {
 		tcvr && controlChannel.send(`gains=${tcvr.gainLevels}`)
