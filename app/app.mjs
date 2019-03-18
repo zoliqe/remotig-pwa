@@ -77,17 +77,17 @@ function onControlMessage(event) {
 	} else if (['agcon', 'agcoff'].includes(msg)) { // deprecated
 		tcvr && (tcvr.agc = tcvr.agcTypes[msg.endsWith('on') ? 0 : 1])
 	} else if (msg === 'gains?') {
-		tcvr && controlChannel.send(`gains=${tcvr.gainLevels}`)
+		tcvr && controlChannel.send(`gains=${JSON.stringify(tcvr.gainLevels)}`)
 	} else if (msg === 'filters?') {
-		tcvr && controlChannel.send(`filters=${tcvr.filters}`)
+		tcvr && controlChannel.send(`filters=${JSON.stringify(tcvr.filters)}`)
 	} else if (msg === 'agcs?') {
-		tcvr && controlChannel.send(`agcs=${tcvr.agcTypes}`)
+		tcvr && controlChannel.send(`agcs=${JSON.stringify(tcvr.agcTypes)}`)
 	} else if (msg === 'modes?') {
-		tcvr && controlChannel.send(`modes=${tcvr.modes}`)
+		tcvr && controlChannel.send(`modes=${JSON.stringify(tcvr.modes)}`)
 	} else if (msg === 'bands?') {
-		tcvr && controlChannel.send(`bands=${tcvr.bands}`)
+		tcvr && controlChannel.send(`bands=${JSON.stringify(tcvr.bands)}`)
 	} else if (msg === 'info?') {
-		tcvr && controlChannel.send(`info=${tcvr.info}`)
+		tcvr && controlChannel.send(`info=${JSON.stringify(tcvr.info)}`)
 	} else if (msg.startsWith('ping=')) {
 		controlChannel.send(msg.replace('ping', 'pong'))
 	} else {
