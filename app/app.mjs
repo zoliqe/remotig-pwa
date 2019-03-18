@@ -19,7 +19,7 @@ let whoNow = null
 let authTime = null
 let controlChannel = null
 let tcvr = null
-let keyer = null
+// let keyer = null
 let connectionReset = false
 
 function onControlOpen() {
@@ -30,7 +30,8 @@ function onControlOpen() {
 }
 
 function onControlClose() {
-	tcvr = keyer = null
+	// tcvr = keyer = null
+	tcvr = null
 	!connectionReset && powerOff(tcvrDevice)
 }
 
@@ -45,23 +46,27 @@ function onControlMessage(event) {
 
 	if (msg == 'poweron') {
 		powerOn(tcvrDevice)
-		tcvr = tcvr || new Transceiver(tcvrAdapter())
-		keyer = keyer || new Keyer(keyerOptions)
+		tcvr = tcvr || new Transceiver(tcvrAdapter(), new Keyer(keyerOptions))
+		// keyer = keyer || new Keyer(keyerOptions)
 	} else if (msg == 'poweroff') {
-		tcvr = keyer = null
+		// tcvr = keyer = null
+		tcvr = null
 		powerOff(tcvrDevice)
 	} else if (['ptton', 'pttoff'].includes(msg)) {
 		const state = msg.endsWith('on')
 		// keyer && keyer.ptt(state) // TODO ptt on/off only in SSB modes!
+		tcvr && (tcvr.ptt = state)
 
 		// if (!state || keyerPin) { // ptt on only when enabled
 		// 	powron.pinState(keyerPin, state)
 		// 	pttTime = state ? secondsNow() : null
 		// }
 	} else if (['.', '-', '_'].includes(msg)) {
-		keyer && keyer.send(msg)
+		// keyer && keyer.send(msg)
+		tcvr && tcvr.sendCw(msg)
 	} else if (msg.startsWith('wpm=')) {
-		keyer && (keyer.wpm = msg.substring(4))
+		// keyer && (keyer.wpm = msg.substring(4))
+		tcvr && (tcvr.wpm = msg.substring(4))
 	} else if (msg.startsWith('f=')) {
 		tcvr && (tcvr.frequency = msg.substring(2))
 	} else if (msg.startsWith('mode=')) {
@@ -74,6 +79,8 @@ function onControlMessage(event) {
 		tcvr && (tcvr.gain = msg.endsWith('on') ? (0 - tcvr.attnLevels[0]) : 0)
 	} else if (['agcon', 'agcoff'].includes(msg)) {
 		tcvr && (tcvr.agc = tcvr.agcTypes[msg.endsWith('on') ? 0 : 1])
+	} else if (msg.startsWith('ping=')) {
+		controlChannel.send(msg.replace('ping', 'pong'))
 	} else {
 		console.warn(`ecmd: '${msg}'`)
 	}

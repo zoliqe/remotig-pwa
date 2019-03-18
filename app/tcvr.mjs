@@ -73,8 +73,9 @@ addAgc('NONE')
 const agcTypes = Object.freeze(_agcTypes)
 
 class Transceiver {
-	constructor(tcvrAdapter) {
+	constructor(tcvrAdapter, keyer) {
 		this._adapter = tcvrAdapter
+		this._keyer = keyer
 
 		if (this._outOfBand(startFrequency)) {
 			this.frequency = this.bands[0].freqFrom + 20*1000
@@ -125,6 +126,24 @@ class Transceiver {
 
 		this._adapter.frequency = freq
 		this._freq = freq
+	}
+
+	get wpm() {
+		return this._keyer && this._keyer.wpm
+	}
+
+	set wpm(value) {
+		this._keyer && (this._keyer.wpm = value)
+	}
+
+	set ptt(value) {
+		if (this._mode == modes.LSB || this._mode == modes.USB) {
+			this._keyer && this._keyer.ptt(value)
+		}
+	}
+
+	sendCw(msg) {
+		this._keyer && this._keyer.send(msg)
 	}
 
 	_outOfBand(f) {
