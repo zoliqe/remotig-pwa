@@ -38,7 +38,7 @@ class Keyer {
 	ptt(state, timeout = this._pttTimeout) {
 		if (state) {
 			if (this._pttTimer != null) clearTimeout(this._pttTimer)
-			else this._ptt(true)
+			this._ptt(true) // this resets powron ptt watchdog counter
 			this._pttTimer = setTimeout(() => {
 				this._pttTimer = null
 				this._ptt(false)
