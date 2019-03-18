@@ -23,13 +23,15 @@ const hex2dec = (h) => {
 }
 
 class IcomTcvr {
-	constructor(adapter, address) {
+	constructor(adapter, keyerConfiguration, address) {
 		this._uart = (s) => adapter.serialData(s)
 		this._tcvrAddr = address
+		this.keyerConfiguration = Object.freeze(keyerConfiguration)
 	}
 
-	static IC706(adapter) { // baudrate = 9600
-		return new IcomTcvr(adapter, 0x58)
+	static IC706(adapter, keyerConfiguration) { // baudrate = 9600
+		keyerConfiguration.pttTail = 0 // don't use PTT for CW
+		return new IcomTcvr(adapter, keyerConfiguration, 0x58)
 	}
 
 	get civAddress() {

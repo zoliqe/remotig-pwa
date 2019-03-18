@@ -1,3 +1,4 @@
+import { Keyer } from "./keyer.mjs";
 
 const startFrequency = 7020000
 
@@ -73,9 +74,9 @@ addAgc('NONE')
 const agcTypes = Object.freeze(_agcTypes)
 
 class Transceiver {
-	constructor(tcvrAdapter, keyer) {
+	constructor(tcvrAdapter) {
 		this._adapter = tcvrAdapter
-		this._keyer = keyer
+		this._keyer = new Keyer(tcvrAdapter.keyerConfiguration)
 
 		if (this._outOfBand(startFrequency)) {
 			this.frequency = this.bands[0].freqFrom + 20*1000
@@ -120,6 +121,20 @@ class Transceiver {
 		return this._adapter.agcTypes || []
 	}
 
+	get info() {
+		return {
+			bands: this.bands, 
+			modes: this.modes, mode: this.mode,
+			filters: this.filters, filter: this.filter,
+			gainLevels: this.gainLevels, gain: this.gain,
+			attnLevels: this.attnLevels,
+			preampLevels: this.preampLevels,
+			agcTypes: this.agcTypes, agc: this.agc,
+			frequency: this.frequency,
+			wpm: this.wpm,
+		}
+	}
+
 	set frequency(value) {
 		const freq = Number(value)
 		if (this._outOfBand(freq) || freq == this._freq) return
@@ -139,6 +154,12 @@ class Transceiver {
 	set ptt(value) {
 		if (this._mode == modes.LSB || this._mode == modes.USB) {
 			this._keyer && this._keyer.ptt(value)
+		}
+	}
+
+	set key(value) {
+		if (this._mode == modes.CW || this._mode == modes.CWR) {
+			this._keyer && this._keyer.key(value)
 		}
 	}
 

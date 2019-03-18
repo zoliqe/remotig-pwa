@@ -1,9 +1,9 @@
 import {secondsNow, log, whoIn, delay} from './utils.mjs'
 import {Transceiver} from './tcvr.mjs'
-import {Keyer} from './keyer.mjs'
+// import {Keyer} from './keyer.mjs'
 import {
 	authTimeout, hwWatchdogTimeout, heartbeat, tcvrDevice, 
-	powronPins, powron, tcvrAdapter, keyerOptions, rigName,
+	powronPins, powron, tcvrAdapter, rigName,
 	pcConfig, socketIoConfig, userMediaConstraints, controlChannelConfig
 } from './config.mjs'
 
@@ -46,26 +46,19 @@ function onControlMessage(event) {
 
 	if (msg == 'poweron') {
 		powerOn(tcvrDevice)
-		tcvr = tcvr || new Transceiver(tcvrAdapter(), new Keyer(keyerOptions))
-		// keyer = keyer || new Keyer(keyerOptions)
-	} else if (msg == 'poweroff') {
-		// tcvr = keyer = null
+		tcvr = tcvr || new Transceiver(tcvrAdapter())
+	} else if (msg === 'poweroff') {
 		tcvr = null
 		powerOff(tcvrDevice)
 	} else if (['ptton', 'pttoff'].includes(msg)) {
 		const state = msg.endsWith('on')
-		// keyer && keyer.ptt(state) // TODO ptt on/off only in SSB modes!
 		tcvr && (tcvr.ptt = state)
-
-		// if (!state || keyerPin) { // ptt on only when enabled
-		// 	powron.pinState(keyerPin, state)
-		// 	pttTime = state ? secondsNow() : null
-		// }
+	} else if (['keydn', 'keyup'].includes(msg)) {
+		const state = msg.endsWith('dn')
+		tcvr && (tcvr.key = state)
 	} else if (['.', '-', '_'].includes(msg)) {
-		// keyer && keyer.send(msg)
 		tcvr && tcvr.sendCw(msg)
 	} else if (msg.startsWith('wpm=')) {
-		// keyer && (keyer.wpm = msg.substring(4))
 		tcvr && (tcvr.wpm = msg.substring(4))
 	} else if (msg.startsWith('f=')) {
 		tcvr && (tcvr.frequency = msg.substring(2))
@@ -79,6 +72,18 @@ function onControlMessage(event) {
 		tcvr && (tcvr.gain = msg.endsWith('on') ? (0 - tcvr.attnLevels[0]) : 0)
 	} else if (['agcon', 'agcoff'].includes(msg)) {
 		tcvr && (tcvr.agc = tcvr.agcTypes[msg.endsWith('on') ? 0 : 1])
+	} else if (msg === 'gains?') {
+		tcvr && controlChannel.send(`gains=${tcvr.gainLevels}`)
+	} else if (msg === 'filters?') {
+		tcvr && controlChannel.send(`filters=${tcvr.filters}`)
+	} else if (msg === 'agcs?') {
+		tcvr && controlChannel.send(`agcs=${tcvr.agcTypes}`)
+	} else if (msg === 'modes?') {
+		tcvr && controlChannel.send(`modes=${tcvr.modes}`)
+	} else if (msg === 'bands?') {
+		tcvr && controlChannel.send(`bands=${tcvr.bands}`)
+	} else if (msg === 'info?') {
+		tcvr && controlChannel.send(`info=${tcvr.info}`)
 	} else if (msg.startsWith('ping=')) {
 		controlChannel.send(msg.replace('ping', 'pong'))
 	} else {

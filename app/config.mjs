@@ -51,20 +51,20 @@ const powron = new Powron({
 	serialBaudRate: 4800
 })
 
-// const catAdapter = powron 
-const catAdapter =  new CatUart(uartSocket, {device: '/dev/ttyUSB0', baudRate: 4800}) // uart must be opened before tcvrAdapter construction 
-const tcvrAdapter = () => ElecraftTcvr.K2(catAdapter) // deffer serial initialization
-
-const keyerOptions = {
+const keyerConfiguration = {
 	cwAdapter: powron,
 	pttAdapter: new CwPttUart(uartSocket, {device: '/dev/ttyUSB1', pttPin: 'dtr'}), //powron,
 	bufferSize: 2, // letter spaces (delay before start sending dit/dah to keyer)
 	pttTimeout: 5000, // milliseconds
-	pttTail: 500, // millis
+	pttTail: 700, // millis
 }
+
+// const catAdapter = powron 
+const catAdapter =  new CatUart(uartSocket, {device: '/dev/ttyUSB0', baudRate: 4800}) // uart must be opened before tcvrAdapter construction 
+const tcvrAdapter = () => ElecraftTcvr.K2(catAdapter, keyerConfiguration) // deffer serial initialization
 
 export {
 	authTimeout, hwWatchdogTimeout, heartbeat, tcvrDevice, powronPins, 
-	powron, catAdapter, tcvrAdapter, keyerOptions, rigName, pcConfig,
+	powron, catAdapter, tcvrAdapter, keyerConfiguration, rigName, pcConfig,
 	socketIoConfig, userMediaConstraints, controlChannelConfig
 }

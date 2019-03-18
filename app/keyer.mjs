@@ -1,17 +1,21 @@
-import {delay} from './utils.mjs'
 
 class Keyer {
 
-	constructor({cwAdapter, pttAdapter, bufferSize = 2, pttLead = 120, pttTail = 500, pttTimeout = 5000}) {
+	/**
+	 * Use pttTail = 0 to disable PTT for CW.
+	 */
+	constructor({cwAdapter, pttAdapter, bufferSize = 2, pttLead = 120, pttTail = 700, pttTimeout = 5000}) {
 		// this._lastKeyed = Date.now()
 		this._wpm = 0
 		this._bufferSize = bufferSize
 		this._pttLead = pttLead
 		this._pttTail = pttTail
 		this._pttTimeout = pttTimeout
-		this._cw = (s) => cwAdapter && cwAdapter.keyerCW(s)
-		this._speed = (v) => cwAdapter && cwAdapter.keyerSpeed(v)
-		this._ptt = (state) => pttAdapter && pttAdapter.pttState(state)
+		this._cw = s => cwAdapter && cwAdapter.keyerCW(s)
+		this._speed = v => cwAdapter && cwAdapter.keyerSpeed(v)
+		this._key = state => 
+			cwAdapter && cwAdapter.keyerPin != null && cwAdapter.pinState(cwAdapter.keyerPin, state)
+		this._ptt = state => pttAdapter && pttAdapter.pttState(state)
 		
 		cwAdapter && cwAdapter.keyerState(true)
 		this._ptt(false)
@@ -37,6 +41,8 @@ class Keyer {
 
 	ptt(state, timeout = this._pttTimeout) {
 		if (state) {
+			if (!timeout) return; // disable PTT
+
 			if (this._pttTimer != null) clearTimeout(this._pttTimer)
 			this._ptt(true) // this resets powron ptt watchdog counter
 			this._pttTimer = setTimeout(() => {
@@ -48,6 +54,23 @@ class Keyer {
 		this._ptt(false)
 		this._pttTimer != null && clearTimeout(this._pttTimer)
 		this._pttTimer = null
+	}
+
+	key(state, timeout = this._pttTimeout) {
+		if (state) {
+			if (!timeout) return;
+
+			if (this._keyTimer != null) clearTimeout(this._keyTimer)
+			this._key(true) // reset powron watchdog timer
+			this._keyTimer = setTimeout(() => {
+				this._keyTimer = null
+				this._key(false)
+			}, timeout)
+			return;
+		}
+		this._key(false)
+		this._keyTimer != null && clearTimeout(this._keyTimer)
+		this._keyTimer = null
 	}
 
 	get wpm() {

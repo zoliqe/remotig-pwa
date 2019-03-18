@@ -28,12 +28,13 @@ const hex2dec = (h) => {
 }
 
 class YeasuTcvr {
-	constructor(adapter) {
+	constructor(adapter, keyerConfiguration) {
 		this._uart = s => adapter.serialData(s)
+		this.keyerConfiguration = Object.freeze(keyerConfiguration)
 	}
 
-	static FT1000MP(adapter) { // baudrate = 4800
-		return new YeasuTcvr(adapter)
+	static FT1000MP(adapter, keyerConfiguration) { // baudrate = 4800
+		return new YeasuTcvr(adapter, keyerConfiguration)
 	}
 
 	get agcTypes() {

@@ -19,12 +19,14 @@ filters[modes.LSB] = filters[modes.USB] = ['2400', '2000', '500', '250']
 // filters[modes.LSB] = filters[modes.USB] = filters[modes.RTTY] = ['1k5', 'OP1', '400', '200']
 
 class ElecraftTcvr {
-	constructor(adapter, options = {cwFilterCount, ssbFilterCount}) {
+	constructor(adapter, keyerConfiguration, options = {cwFilterCount, ssbFilterCount}) {
 		this._uart = data => adapter.serialData(data + ';')
+		this.keyerConfiguration = Object.freeze(keyerConfiguration)
 	}
 
-	static K2(adapter, options = {cwFilterCount: 4, ssbFilterCount: 4}) { //baudrate = 4800, cwFilterCount = 4, ssbFilterCount = 4
-		return new ElecraftTcvr(adapter, options)
+	static K2(adapter, keyerConfiguration, options = {cwFilterCount: 4, ssbFilterCount: 4}) { //baudrate = 4800, cwFilterCount = 4, ssbFilterCount = 4
+		keyerConfiguration.pttTail = 0 // don't use PTT for CW
+		return new ElecraftTcvr(adapter, keyerConfiguration, options)
 	}
 
 	get agcTypes() {
