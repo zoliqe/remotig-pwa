@@ -102,6 +102,12 @@ class Transceiver {
 		return this._adapter.filters(this._mode) || []
 	}
 
+	get filtersAllModes() {
+		const filters = {}
+		this.modes.forEach(mode => filters[mode] = this._adapter.filters(mode))
+		return filters
+	}
+
 	get attnLevels() {
 		return this._adapter.attns || []
 	}
@@ -125,7 +131,7 @@ class Transceiver {
 		return {
 			bands: this.bands, 
 			modes: this.modes, mode: this.mode,
-			filters: this.filters, filter: this.filter,
+			filters: this.filtersAllModes, filter: this.filter,
 			gainLevels: this.gainLevels, gain: this.gain,
 			attnLevels: this.attnLevels,
 			preampLevels: this.preampLevels,
