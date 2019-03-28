@@ -78,6 +78,7 @@ class Transceiver {
 		this._adapter = tcvrAdapter
 		this._keyer = new Keyer(tcvrAdapter.keyerConfiguration)
 
+		this._adapter.init && this._adapter.init()
 		if (this._outOfBand(startFrequency)) {
 			this.frequency = this.bands[0].freqFrom + 20*1000
 		} else {
@@ -136,17 +137,9 @@ class Transceiver {
 			attnLevels: this.attnLevels,
 			preampLevels: this.preampLevels,
 			agcTypes: this.agcTypes, agc: this.agc,
-			frequency: this.frequency,
+			frequency: this.frequency, split: this.split,
 			wpm: this.wpm,
 		}
-	}
-
-	set frequency(value) {
-		const freq = Number(value)
-		if (this._outOfBand(freq) || freq == this._freq) return
-
-		this._adapter.frequency = freq
-		this._freq = freq
 	}
 
 	get wpm() {
@@ -178,8 +171,44 @@ class Transceiver {
 		return !band || !this.bands.includes(band)
 	}
 
+	set frequency(value) {
+		const freq = Number(value)
+		if (this._outOfBand(freq) || freq == this._freq) return
+
+		this._adapter.frequency = freq
+		this._freq = freq
+	}
+
 	get frequency() {
 		return this._freq
+	}
+
+	set split(value) {
+		const freq = Number(value)
+		if (this._outOfBand(freq) || Band.byFreq(freq) !== Band.byFreq(this._freq) || freq == this._split) return
+
+		this._adapter.split = freq
+		this._split = freq
+	}
+
+	get split() {
+		return this._split
+	}
+
+	set rit(value) {
+		Math.abs(value) < 10000 && (this._adapter.rit = value)
+	}
+
+	set xit(value) {
+		Math.abs(value) < 10000 && (this._adapter.xit = value)
+	}
+
+	clearRit() {
+		this._adapter.clearRit()
+	}
+
+	clearXit() {
+		this._adapter.clearXit()
 	}
 
 	set mode(value) {
@@ -237,6 +266,7 @@ class Transceiver {
 	get filter() {
 		return this._filter
 	}
+
 }
 
 export {Transceiver, bands, modes, agcTypes}

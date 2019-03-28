@@ -62,6 +62,16 @@ function onControlMessage(event) {
 		tcvr && (tcvr.wpm = msg.substring(4))
 	} else if (msg.startsWith('f=')) {
 		tcvr && (tcvr.frequency = msg.substring(2))
+	} else if (msg.startsWith('split=')) {
+		tcvr && (tcvr.split = msg.substring(6))
+	} else if (msg.startsWith('rit=')) {
+		tcvr && (tcvr.rit = msg.substring(4))
+	} else if (msg.startsWith('xit=')) {
+		tcvr && (tcvr.xit = msg.substring(4))
+	} else if (msg.startsWith('ritclr')) {
+		tcvr && tcvr.clearRit()
+	} else if (msg.startsWith('xitclr')) {
+		tcvr && tcvr.clearXit()
 	} else if (msg.startsWith('mode=')) {
 		tcvr && (tcvr.mode = msg.substring(5))
 	} else if (msg.startsWith('filter=')) {

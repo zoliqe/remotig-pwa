@@ -19,6 +19,11 @@ filters[modes.LSB] = filters[modes.USB] = ['2400', '2000', '500', '250']
 // filters[modes.LSB] = filters[modes.USB] = filters[modes.RTTY] = ['1k5', 'OP1', '400', '200']
 
 class ElecraftTcvr {
+	
+	_splitState = false
+	_rit = 0
+	_xit = 0
+
 	constructor(adapter, keyerConfiguration, options = {cwFilterCount, ssbFilterCount}) {
 		this._uart = data => adapter.serialData(data + ';')
 		this.keyerConfiguration = Object.freeze(keyerConfiguration)
@@ -27,6 +32,10 @@ class ElecraftTcvr {
 	static K2(adapter, keyerConfiguration, options = {cwFilterCount: 4, ssbFilterCount: 4}) { //baudrate = 4800, cwFilterCount = 4, ssbFilterCount = 4
 		keyerConfiguration.pttTail = 0 // don't use PTT for CW
 		return new ElecraftTcvr(adapter, keyerConfiguration, options)
+	}
+
+	init() {
+		this._uart('FR0') // set VFO A as RX VFO + cancel SPLIT
 	}
 
 	get agcTypes() {
@@ -82,6 +91,75 @@ class ElecraftTcvr {
 		this._uart(`FW0000${index}`)
 		this._uart('K20')
 		// for (let i = 0; i < count; i++) this._uart(`FW0000${index}`) // cycle trought filters (basic cmd format)
+	}
+
+	set txpower(level) {
+		this._uart(`PC${String(level).padStart(3, '0')}`)
+	}
+
+	set split(value) {
+		const state = value != 0
+		if (state != this._splitState) {
+			this._uart(`FT${state ? 1 : 0}`)
+			this._splitState = state
+		}
+		if (!state) return
+
+		let cmd = 'FB000'
+		if (value < 10000000) cmd += '0'
+		this._uart(cmd + value)
+	}
+
+	set rit(value) {
+		if (!value) {
+			this._uart('RT0')
+			this._rit = -1
+			return
+		}
+		if (this._rit == -1) {
+			this._xit && this.xit(0)
+			this._uart('RT1')
+			this._rit = 0
+			this.clearRit()
+		}
+		const steps = this._diff10(this._rit, value)
+		const up = steps > 0
+		for (let step = 0; step < Math.abs(steps); step++) this._uart(up ? 'RU' : 'RD')
+	}
+
+	set xit(value) {
+		if (!value) {
+			this._uart('XT0')
+			this._xit = -1
+			return
+		}
+		if (this._rit == -1) {
+			this._rit && this.rit(0)
+			this._uart('XT1')
+			this._xit = 0
+			this.clearXit()
+		}
+		const steps = this._diff10(this._xit, value)
+		const up = steps > 0
+		for (let step = 0; step < Math.abs(steps); step++) this._uart(up ? 'RU' : 'RD')
+	}
+
+	_diff10(v1, v2) {
+		return Math.floor(v2 / 10) - Math.floor(v1 / 10)
+	}
+
+	clearRit() {
+		if (this._rit != -1) {
+			this._uart('RC')
+			this._rit = 0
+		}
+	}
+
+	clearXit() {
+		if (this._xit != -1) {
+			this._uart('RC')
+			this._xit = 0
+		}
 	}
 }
 
