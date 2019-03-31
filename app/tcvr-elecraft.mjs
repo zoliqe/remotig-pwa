@@ -30,7 +30,7 @@ class ElecraftTcvr {
 	}
 
 	static K2(adapter, keyerConfiguration, options = {cwFilterCount: 4, ssbFilterCount: 4}) { //baudrate = 4800, cwFilterCount = 4, ssbFilterCount = 4
-		keyerConfiguration.pttTail = 0 // don't use PTT for CW
+		// keyerConfiguration.pttTail = 0 // REMOVED due inserting buffer on each element, also error for frozen Object; don't use PTT for CW
 		return new ElecraftTcvr(adapter, keyerConfiguration, options)
 	}
 

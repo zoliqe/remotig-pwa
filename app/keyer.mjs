@@ -24,7 +24,7 @@ class Keyer {
 	send(msg) {
 		if (this.disabled) return
 
-		if (msg == '.' || msg == '-') {
+		if (msg === '.' || msg === '-') {
 			const pttWasOff = this._pttTimer == null
 			this.ptt(true, this._pttTail)
 			if (pttWasOff/*this._lastKeyed + this._pttLead < Date.now()*/) {
@@ -35,7 +35,9 @@ class Keyer {
 			}
 		}
 
+		this.ptt(true, this._pttTail)
 		this._cw(msg)
+		(msg === '.' || msg === '-') && this.ptt(true, this._pttTail)
 		// this._lastKeyed = Date.now()
 	}
 
