@@ -257,10 +257,28 @@ class Transceiver {
 	}
 
 	set filter(value) {
-		if (this.filters.includes(value) && value != this._filter) {
-			this._adapter.filter(value, this._mode)
-			this._filter = value
-		}
+		if (value === this._filter) return
+		const filter = this._findNearestWiderFilter(value)
+		if (filter === this._filter) return
+		this._adapter.filter(filter, this._mode)
+		this._filter = filter
+	// if (this.filters.includes(value) && value != this._filter) {
+	// 		this._adapter.filter(value, this._mode)
+	// 		this._filter = value
+	// 	}
+	}
+
+	_findNearestWiderFilter(valueString) {
+		const value = parseInt(valueString, 10)
+		const widest = parseInt(this.filters[this.filters.length - 1], 10)
+		if (isNaN(value) || isNaN(widest)) return this.filters[this.filters.length - 1]
+
+		const result = this.filters
+			.map(bw => parseInt(bw, 10))
+			.filter(bw => !isNaN(bw) && bw >= value)
+			.reduce((nearestWider, bw) => bw < nearestWider ? bw : nearestWider, widest)
+		if (result == null) return String(widest)
+		return String(result)
 	}
 
 	get filter() {
