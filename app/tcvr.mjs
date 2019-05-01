@@ -270,13 +270,17 @@ class Transceiver {
 
 	_findNearestWiderFilter(valueString) {
 		const value = parseInt(valueString, 10)
-		const widest = parseInt(this.filters[this.filters.length - 1], 10)
-		if (isNaN(value) || isNaN(widest)) return this.filters[this.filters.length - 1]
-
-		const result = this.filters
+		console.debug('_findNearestWiderFilter:', [valueString, value])
+		const values = this.filters
 			.map(bw => parseInt(bw, 10))
+			.sort()
+		const widest = parseInt(values[values.length - 1], 10)
+		if (isNaN(value) || isNaN(widest)) return values[values - 1]
+
+		const result = values
 			.filter(bw => !isNaN(bw) && bw >= value)
 			.reduce((nearestWider, bw) => bw < nearestWider ? bw : nearestWider, widest)
+		console.debug('_findNearestWiderFilter:', result)
 		if (result == null) return String(widest)
 		return String(result)
 	}

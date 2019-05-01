@@ -4,7 +4,7 @@ class Keyer {
 	/**
 	 * Use pttTail = 0 to disable PTT for CW.
 	 */
-	constructor({cwAdapter, pttAdapter, bufferSize = 2, pttLead = 120, pttTail = 700, pttTimeout = 5000}) {
+	constructor({cwAdapter, pttAdapter, bufferSize = 2, pttLead = 120, pttTail = 500, pttTimeout = 5000}) {
 		// this._lastKeyed = Date.now()
 		this._wpm = 0
 		this._bufferSize = bufferSize
