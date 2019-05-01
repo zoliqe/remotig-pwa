@@ -15,7 +15,7 @@ MD[modes.RTTY] = 6
 const filters = {}
 filters[modes.CW] = filters[modes.CWR] = ['1500', '700', '400', '250']
 // filters[modes.CW] = filters[modes.CWR] = ['1k5', '700', '400', '200']
-filters[modes.LSB] = filters[modes.USB] = ['2300', '1800', '700', '400']
+filters[modes.LSB] = filters[modes.USB] = ['2100', '2300', '700', '400']
 // filters[modes.LSB] = filters[modes.USB] = filters[modes.RTTY] = ['1k5', 'OP1', '400', '200']
 
 class ElecraftTcvr {
