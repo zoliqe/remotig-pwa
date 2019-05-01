@@ -228,8 +228,10 @@ class Transceiver {
 		const gain = Number(value)
 		if (gain != null && gain != this._gain && this.gainLevels.includes(gain)) {
 			if (gain < 0) {
+				this._adapter.preamp = 0
 				this._adapter.attn = 0 - gain
 			} else if (gain > 0) {
+				this._adapter.attn = 0
 				this._adapter.preamp = gain
 			} else {
 				this._adapter.attn = 0
