@@ -13,9 +13,9 @@ MD[modes.USB] = 2
 MD[modes.RTTY] = 6
 
 const filters = {}
-filters[modes.CW] = filters[modes.CWR] = ['1700', '800', '500', '200']
+filters[modes.CW] = filters[modes.CWR] = ['1500', '700', '400', '250']
 // filters[modes.CW] = filters[modes.CWR] = ['1k5', '700', '400', '200']
-filters[modes.LSB] = filters[modes.USB] = ['2400', '2000', '600', '300']
+filters[modes.LSB] = filters[modes.USB] = ['2300', '1800', '700', '400']
 // filters[modes.LSB] = filters[modes.USB] = filters[modes.RTTY] = ['1k5', 'OP1', '400', '200']
 
 class ElecraftTcvr {
@@ -87,8 +87,9 @@ class ElecraftTcvr {
 	filter(filter, mode) {
 		// const count = Object.keys(filters[mode]).length / 2
 		const index = filters[mode].indexOf(filter)
+		if (index < 0) return
 		this._uart('K22')
-		this._uart(`FW0000${index}`)
+		this._uart(`FW0000${index + 1}`)
 		this._uart('K20')
 		// for (let i = 0; i < count; i++) this._uart(`FW0000${index}`) // cycle trought filters (basic cmd format)
 	}

@@ -273,9 +273,9 @@ class Transceiver {
 		console.debug('_findNearestWiderFilter:', [valueString, value])
 		const values = this.filters
 			.map(bw => parseInt(bw, 10))
-			.sort()
+			.sort((a, b) => a - b)
 		const widest = parseInt(values[values.length - 1], 10)
-		if (isNaN(value) || isNaN(widest)) return values[values - 1]
+		if (isNaN(value) || isNaN(widest)) return values[values.length - 1]
 
 		const result = values
 			.filter(bw => !isNaN(bw) && bw >= value)
