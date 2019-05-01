@@ -214,7 +214,7 @@ class Transceiver {
 	set mode(value) {
 		if (!value) return
 		const mode = modes[value.toUpperCase()]
-		if (mode && mode != this._mode && this.modes.includes(mode)) {
+		if (mode && /*mode != this._mode &&*/ this.modes.includes(mode)) {
 			this._adapter.mode = mode
 			this._mode = mode
 		}
@@ -226,7 +226,7 @@ class Transceiver {
 
 	set gain(value) {
 		const gain = Number(value)
-		if (gain != null && gain != this._gain && this.gainLevels.includes(gain)) {
+		if (gain != null /*&& gain != this._gain*/ && this.gainLevels.includes(gain)) {
 			let preamp = 0
 			let attn = 0
 			if (gain < 0) {
@@ -247,7 +247,7 @@ class Transceiver {
 	set agc(value) {
 		if (!value) return
 		const agc = agcTypes[value.toUpperCase()]
-		if (agc && agc != this._agc && this.agcTypes.includes(agc)) {
+		if (agc && /*agc != this._agc &&*/ this.agcTypes.includes(agc)) {
 			this._adapter.agc = agc
 			this._agc = agc
 		}
@@ -258,9 +258,9 @@ class Transceiver {
 	}
 
 	set filter(value) {
-		if (value === this._filter) return
+		// if (value === this._filter) return
 		const filter = this._findNearestWiderFilter(value)
-		if (filter === this._filter) return
+		// if (filter === this._filter) return
 		this._adapter.filter(filter, this._mode)
 		this._filter = filter
 	// if (this.filters.includes(value) && value != this._filter) {
