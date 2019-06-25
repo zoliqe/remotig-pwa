@@ -114,6 +114,7 @@ class ElecraftTcvr {
 	set rit(value) {
 		if (!value) {
 			this._uart('RT0')
+			this._uart('RC')
 			this._rit = -1
 			return
 		}
@@ -131,10 +132,11 @@ class ElecraftTcvr {
 	set xit(value) {
 		if (!value) {
 			this._uart('XT0')
+			this._uart('RC')
 			this._xit = -1
 			return
 		}
-		if (this._rit == -1) {
+		if (this._xit == -1) {
 			this._rit && this.rit(0)
 			this._uart('XT1')
 			this._xit = 0

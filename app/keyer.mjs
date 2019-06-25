@@ -4,11 +4,11 @@ class Keyer {
 	/**
 	 * Use pttTail = 0 to disable PTT for CW.
 	 */
-	constructor({cwAdapter, pttAdapter, bufferSize = 2, pttLead = 120, pttTail = 500, pttTimeout = 5000}) {
+	constructor({cwAdapter, pttAdapter, bufferSize = 2, pttLead = 120, pttTail = 300, pttTimeout = 5000}) {
 		// this._lastKeyed = Date.now()
 		this._wpm = 0
 		this._bufferSize = bufferSize
-		this._pttLead = pttLead
+		// this._pttLead = pttLead
 		this._pttTail = pttTail
 		this._pttTimeout = pttTimeout
 		this._cw = s => cwAdapter && cwAdapter.keyerCW(s)
@@ -24,20 +24,21 @@ class Keyer {
 	send(msg) {
 		if (this.disabled) return
 
-		if (msg === '.' || msg === '-') {
-			const pttWasOff = this._pttTimer == null
-			this.ptt(true, this._pttTail)
-			if (pttWasOff/*this._lastKeyed + this._pttLead < Date.now()*/) {
-				// on longer pause btwn elements send buffering spaces
-				if (this._bufferSize != null) for (let i = 0; i < this._bufferSize; i++) this._cw('_')
-				// cannot use async delayed calls w/o buffered msgs (FIFO) and locking during pttLead
-				//			else await delay(this._pttLead) 
-			}
-		}
+		// if (msg === '.' || msg === '-') {
+		// 	const pttWasOff = this._pttTimer == null
+		// 	this.ptt(true, this._pttTail)
+		// 	if (pttWasOff/*this._lastKeyed + this._pttLead < Date.now()*/) {
+		// 		// on longer pause btwn elements send buffering spaces
+		// 		if (this._bufferSize != null) for (let i = 0; i < this._bufferSize; i++) this._cw('_')
+		// 		// cannot use async delayed calls w/o buffered msgs (FIFO) and locking during pttLead
+		// 		//			else await delay(this._pttLead) 
+		// 	}
+		// }
 
 		this.ptt(true, this._pttTail)
 		this._cw(msg)
-		(msg === '.' || msg === '-') && this.ptt(true, this._pttTail)
+		// (msg === '.' || msg === '-') && 
+			this.ptt(true, this._pttTail)
 		// this._lastKeyed = Date.now()
 	}
 
@@ -51,11 +52,11 @@ class Keyer {
 				this._pttTimer = null
 				this._ptt(false)
 			}, timeout)
-			return;
+		} else {
+			this._ptt(false)
+			this._pttTimer != null && clearTimeout(this._pttTimer)
+			this._pttTimer = null
 		}
-		this._ptt(false)
-		this._pttTimer != null && clearTimeout(this._pttTimer)
-		this._pttTimer = null
 	}
 
 	key(state, timeout = this._pttTimeout) {
@@ -68,11 +69,11 @@ class Keyer {
 				this._keyTimer = null
 				this._key(false)
 			}, timeout)
-			return;
+		} else {
+			this._key(false)
+			this._keyTimer != null && clearTimeout(this._keyTimer)
+			this._keyTimer = null
 		}
-		this._key(false)
-		this._keyTimer != null && clearTimeout(this._keyTimer)
-		this._keyTimer = null
 	}
 
 	get wpm() {
