@@ -9,7 +9,7 @@ class Keyer {
 		this._wpm = 0
 		this._bufferSize = bufferSize
 		// this._pttLead = pttLead
-		this._pttTail = pttTail
+		// this._pttTail = pttTail
 		this._pttTimeout = pttTimeout
 		this._cw = s => cwAdapter && cwAdapter.keyerCW(s)
 		this._speed = v => cwAdapter && cwAdapter.keyerSpeed(v)
@@ -35,10 +35,10 @@ class Keyer {
 		// 	}
 		// }
 
-		this.ptt(true, this._pttTail)
+		// this.ptt(true, this._pttTail)
 		this._cw(msg)
 		// (msg === '.' || msg === '-') && 
-			this.ptt(true, this._pttTail)
+			// this.ptt(true, this._pttTail)
 		// this._lastKeyed = Date.now()
 	}
 
