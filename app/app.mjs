@@ -22,15 +22,22 @@ let tcvr = null
 // let keyer = null
 let connectionReset = false
 
-function onControlOpen() {
-	console.debug('control connect')
+async function onControlOpen() {
+	log('control connect')
+
+	powerOn(tcvrDevice)
+        await delay(3000) // wait for tcvr internal CPU start
+	tcvr = tcvr || new Transceiver(tcvrAdapter())
+        !connectionReset && (await tcvr.on())
+
 	connectionReset = false
 	controlChannel.send('conack')
-	console.info('control open')
+	log('control open')
 }
 
 function onControlClose() {
 	// tcvr = keyer = null
+        !connectionReset && tcvr && tcvr.off()
 	tcvr = null
 	!connectionReset && powerOff(tcvrDevice)
 }
@@ -45,11 +52,12 @@ function onControlMessage(event) {
 	console.debug('cmd: ' + msg)
 
 	if (msg == 'poweron') {
-		powerOn(tcvrDevice)
-		tcvr = tcvr || new Transceiver(tcvrAdapter())
+		powerOn(tcvrDevice) // heartbeat for session live
+//		tcvr = tcvr || new Transceiver(tcvrAdapter())
 	} else if (msg === 'poweroff') {
-		tcvr = null
-		powerOff(tcvrDevice)
+//                tcvr && tcvr.off()
+//		tcvr = null
+//		powerOff(tcvrDevice)
 	} else if (['ptton', 'pttoff'].includes(msg)) {
 		const state = msg.endsWith('on')
 		tcvr && (tcvr.ptt = state)
@@ -216,7 +224,7 @@ export function stop() {
 		pc.onremovetrack = null
 		pc = null
 	}
-	powerOff(tcvrDevice) // force powerOff
+	// powerOff(tcvrDevice) // force powerOff - is managed by controlChannel.close()
 }
 
 ////////////////////////////////////////////////////

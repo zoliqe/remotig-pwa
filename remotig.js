@@ -97,7 +97,7 @@ class CwPttUart {
 		if (this._pttPin && this._uart) {
 			const opts = {}
 			opts[this._pttPin] = state
-			// console.log('PTT:', opts)
+			console.log(Date.now() + ' PTT:', opts)
 			this._uart.set(opts)
 		}
 	}
@@ -117,11 +117,11 @@ class CatUart {
 			this._uart = uart
 			console.log('CAT opened:', options)
 		})
-		// tcvr.on('data', (data) => log(`CAT => ${data}`))
+		uart.on('data', data => console.log(`${Date.now()} CAT => ${data}`))
 	}
 
 	serialData(data, callback) {
-		// console.log('CAT serialData:', data)
+		console.log(Date.now() + ' CAT <=', data)
 		this._uart && this._uart.write(data, encoding, (err) => {
 			if (err) console.log('CAT error:', err)
 			else if (callback) callback()
@@ -150,7 +150,7 @@ class PowronUart {
 	}
 
 	send(data) {
-		// console.log('POWRON <=', data)
+		console.log(Date.now() + ' POWRON <=', data)
 		data.length > 1 && (data += '\n') // add NL delimiter for cmd with param
 		this._uart.write(data, encoding, (err) => err && console.log('POWRON error:', err))
 	}
