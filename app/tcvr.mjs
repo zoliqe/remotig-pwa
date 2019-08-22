@@ -78,7 +78,6 @@ class Transceiver {
 		this._adapter = tcvrAdapter
 		this._keyer = new Keyer(tcvrAdapter.keyerConfiguration)
 
-		this._adapter.init && this._adapter.init()
 		// if (this._outOfBand(startFrequency)) {
 		// 	this.frequency = this.bands[0].freqFrom + 20*1000
 		// } else {
@@ -90,6 +89,15 @@ class Transceiver {
 		// this.gain = 0
 		// if (this.filters.length > 0) this.filter = this.filters[0]
 	}
+
+        async on() {
+                this._adapter.init && (await this._adapter.init())
+        }
+
+        off() {
+              this._adapter && this._adapter.close && this._adapter.close()
+              this._adapter = null
+        }
 
 	get bands() {
 		return this._adapter.bands || [] //.map(Band.byId)
@@ -291,7 +299,6 @@ class Transceiver {
 	// get filter() {
 	// 	return this._filter
 	// }
-
 }
 
 export {Transceiver, bands, modes, agcTypes}
