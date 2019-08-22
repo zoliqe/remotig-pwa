@@ -62,6 +62,8 @@ const keyerConfiguration = {
 // const catAdapter = powron 
 const catAdapter =  new CatUart(uartSocket, {device: '/dev/ttyUSB0', baudRate: 4800}) // uart must be opened before tcvrAdapter construction 
 const tcvrAdapter = () => ElecraftTcvr.K2(catAdapter, keyerConfiguration) // deffer serial initialization
+//const tcvrAdapter = () => KenwoodTcvr.TS2000(catAdapter, keyerOptions, {powerViaCat: true}) // deffer serial initialization
+//const tcvrAdapter = () => YeasuTcvr.FT1000MP(catAdapter, keyerOptions) // deffer serial initialization
 
 export {
 	authTimeout, hwWatchdogTimeout, heartbeat, tcvrDevice, powronPins, 
