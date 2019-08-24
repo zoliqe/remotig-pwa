@@ -126,7 +126,7 @@ let pc;
 let remoteStream;
 
 function connectSocket() {
-	socket = io('wss://om4aa.ddns.net', socketIoConfig)
+	socket = io('wss://' + socketIoConfig.qth, socketIoConfig)
   
   socket.on('connect', () => {
     console.info('Open rig', rigName)  

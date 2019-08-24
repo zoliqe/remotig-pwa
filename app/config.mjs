@@ -20,6 +20,7 @@ const socketIoConfig = {
 	transports: ['websocket'],
 	reconnectionDelay: 10000,
 	reconnectionDelayMax: 60000,
+	qth: 'om4aa.ddns.net',
 }
 const userMediaConstraints = { 
 	video: false, 
