@@ -30,7 +30,7 @@ class IcomTcvr {
 	}
 
 	static IC706(adapter, keyerConfiguration) { // baudrate = 9600
-		keyerConfiguration.pttTail = 0 // don't use PTT for CW
+// 		keyerConfiguration.pttTail = 0 // don't use PTT for CW
 		return new IcomTcvr(adapter, keyerConfiguration, 0x58)
 	}
 

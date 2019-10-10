@@ -12,20 +12,9 @@ const PowronPins = Object.freeze({pin2: 0, pin3: 1, pin4: 2, pin5: 3,
 
 class Powron {
 	constructor(options = {device, keyerPin, pttPin, serialBaudRate}) {
-    this._encoder = new TextEncoder()
-    this._decoder = new TextDecoder()
-    this._port = null
-		// log(`Opening POWRON ${uartDev}`)
-		// this._uart = new SerialPort(options.device, { baudRate: baudRate },
-		// 	(err) => err && console.log(`POWRON ${err.message}`))
-		// this._uart.on('open', () => {
-		// 	console.log(`POWRON opened: ${options.device} ${baudRate}; keyer=${options.keyerPin} ptt=${options.pttPin} serial=${options.serialBaudRate}`)
-		// 	// this._uart.on('data', (data) => console.log(`POWRON => ${String(data).trim()}`))
-		// 	setTimeout(() => {
-		// 		this.send(startSeq)
-		// 		options.serialBaudRate && setTimeout(() => this.serial(options.serialBaudRate), 1000)
-		// 	}, 3000)
-		// })
+		this._encoder = new TextEncoder()
+		this._decoder = new TextDecoder()
+		this._port = null
 		this._timeout = 600
 		this._keyerPin = options.keyerPin
 		this._pttPin = options.pttPin
@@ -34,53 +23,62 @@ class Powron {
 	}
 
   async connect() {
-	  console.debug('powron connect request')
-    if (!serial || !navigator.usb) {
-      throw new Error('powron: WebUSB is not supported!')
-    }
+	console.debug('powron connect request')
+	if (!serial || !navigator.usb) {
+		throw new Error('powron: WebUSB is not supported!')
+	}
 
 	this._port && this.disconnect()
 	
+	const panel = document.querySelector('#panel')
 	console.debug('getting serial.getPorts()')
     const ports = await serial.getPorts()
-    console.debug(`powron getPorts(): ${JSON.stringify(ports)}`)
+    console.debug(`Ports: ${JSON.stringify(ports)}`)
     if (ports.length == 1) {
-      this._port = ports[0]
-    } else if (ports.length > 1) {
-      this._port = await serial.requestPort();
-    } else {
-      this._port = await serial.requestPort(); // TODO stop connection process, use button to connect
+		this._port = ports[0]
+		await this._connectPort(panel)
+		return
     }
 
-    return new Promise((resolve, reject) => this._connectPort(resolve, reject))
-//    console.debug(`powron device: ${this._port.device_.productName} (${this._port.device_.manufacturerName})`)
-//      await this._port.connect()
-//      console.info('powron connected :-)')
-
+	if (!this._port || !this._port.device_) {
+		panel.innerHTML = 'No device found, it must be paired first. <button id="pair">Pair device</button>'
+		const pairBtn = document.querySelector('#pair')
+		pairBtn.onclick = async () => {
+			console.debug('Port request')
+			try {
+				this._port = await serial.requestPort()
+			} catch (e) {
+				console.error('requestPort error:', e.message)
+				return
+			}
+			await this._connectPort(panel)
+		}
+	}
+//       this._port = await serial.requestPort(); // TODO stop connection process, use button to connect
   }
 
-  async _connectPort(resolve, reject) {
-    if (!this._port) {
-      reject('port is null')
-      return
+  async _connectPort(panel) {
+    if (!this._port || !this._port.device_) {
+	    throw new Error('Powron: no device selected!')
     }
     console.debug(`powron device: ${this._port.device_.productName} (${this._port.device_.manufacturerName})`)
+    panel.innerHTML = `Paired device: <strong>${this._port.device_.productName} (${this._port.device_.manufacturerName})</strong>`
 
-    try {
-      await this._port.connect()
-      console.info('powron connected :-)')
+	try {
+		await this._port.connect()
+	} catch (e) {
+		console.error('Powron error:', e.message)
+		return
+	}
 
-			setTimeout(() => {
-				this.send(startSeq)
-				this._serialBaudRate && setTimeout(() => this.serial(this._serialBaudRate), 1000)
-			}, 3000)
-	} catch (error) {
-      reject(error)
-      return
-    }
+	console.info('powron connected :-)')
+    panel.innerHTML = `Connected device: <strong>${this._port.device_.productName} (${this._port.device_.manufacturerName})</strong>`
+	setTimeout(() => {
+		this.send(startSeq)
+		this._serialBaudRate && setTimeout(() => this.serial(this._serialBaudRate), 1000)
+	}, 3000)
     this._port.onReceive = data => console.debug('powron rcvd:', this._decoder.decode(data))
     this._port.onReceiveError = error => this.onReceiveError(error)
-    resolve(this)
   }
 
   onReceiveError(error) {
