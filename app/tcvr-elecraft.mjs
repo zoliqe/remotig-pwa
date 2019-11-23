@@ -23,15 +23,21 @@ class ElecraftTcvr {
 	_splitState = false
 	_rit = 0
 	_xit = 0
+	#model = ''
 
-	constructor(adapter, keyerConfiguration, options = {cwFilterCount, ssbFilterCount}) {
+	constructor(model, adapter, keyerConfiguration, options = {cwFilterCount, ssbFilterCount}) {
+		this.#model = model
 		this._uart = data => adapter.serialData(data + ';')
 		this.keyerConfiguration = Object.freeze(keyerConfiguration)
 	}
 
 	static K2(adapter, keyerConfiguration, options = {cwFilterCount: 4, ssbFilterCount: 4}) { //baudrate = 4800, cwFilterCount = 4, ssbFilterCount = 4
 		// keyerConfiguration.pttTail = 0 // REMOVED due inserting buffer on each element, also error for frozen Object; don't use PTT for CW
-		return new ElecraftTcvr(adapter, keyerConfiguration, options)
+		return new ElecraftTcvr('k2', adapter, keyerConfiguration, options)
+	}
+
+	static KX3(adapter, keyerConfiguration, options = {}) { // baudrate = 38400
+		return new ElecraftTcvr('kx3', adapter, keyerConfiguration, options)
 	}
 
 	init() {
@@ -85,13 +91,22 @@ class ElecraftTcvr {
 	}
 
 	filter(filter, mode) {
-		// const count = Object.keys(filters[mode]).length / 2
 		const index = filters[mode].indexOf(filter)
 		if (index < 0) return
+		if (this.#model === 'k2') this._filterK2(index)
+	    	else this._filterK3(filter) 
+	}
+
+	_filterK2(index) {
 		this._uart('K22')
 		this._uart(`FW0000${index + 1}`)
 		this._uart('K20')
+		// const count = Object.keys(filters[mode]).length / 2
 		// for (let i = 0; i < count; i++) this._uart(`FW0000${index}`) // cycle trought filters (basic cmd format)
+	}
+		
+	_filterK3(bw) {
+		this._uart(`BW${String(bw).padStart(4, '0')}`)
 	}
 
 	set txpower(level) {
