@@ -106,7 +106,9 @@ class ElecraftTcvr {
 	}
 		
 	_filterK3(bw) {
-		this._uart(`BW${String(bw).padStart(4, '0')}`)
+		bw = Number(bw) / 10
+		bw = String(bw).padStart(4, '0')
+		this._uart('BW' + bw)
 	}
 
 	set txpower(level) {
